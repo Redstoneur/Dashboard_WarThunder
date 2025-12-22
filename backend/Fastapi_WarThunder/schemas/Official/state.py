@@ -1,0 +1,36 @@
+from pydantic import BaseModel
+from typing import Optional
+
+class StateModel(BaseModel):
+    valid: bool
+    aileron: Optional[float]
+    elevator: Optional[float]
+    rudder: Optional[float]
+    flaps: Optional[float]
+    gear: Optional[float]
+    airbrake: Optional[float]
+    H_m: Optional[float]
+    TAS_kmh: Optional[float]
+    IAS_kmh: Optional[float]
+    M: Optional[float]
+    AoA_deg: Optional[float]
+    AoS_deg: Optional[float]
+    Ny: Optional[float]
+    Vy_ms: Optional[float]
+    Wx_deg_s: Optional[float]
+    Mfuel_kg: Optional[float]
+    Mfuel0_kg: Optional[float]
+    throttle1_percent: Optional[float]
+    RPM_throttle1_percent: Optional[float]
+    mixture1_percent: Optional[float]
+    radiator1_percent: Optional[float]
+    compressor_stage1: Optional[int]
+    magneto1: Optional[int]
+    power1_hp: Optional[float]
+    RPM1: Optional[float]
+    manifold_pressure1_atm: Optional[float]
+    oil_temp1_C: Optional[float]
+    pitch1_deg: Optional[float]
+    thrust1_kg: Optional[float]
+    efficiency1_percent: Optional[float]
+
