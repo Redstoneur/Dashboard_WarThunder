@@ -118,7 +118,7 @@ class App(FastAPI):
 
         @self.get(
             path="/indicators",
-            tags=["Official API"],
+            tags=["Official_API"],
             summary="Get Indicators",
             response_model=IndicatorsModel,
             description="Endpoint to retrieve indicators from War Thunder",
@@ -192,7 +192,7 @@ class App(FastAPI):
 
         @self.get(
             path="/map_info",
-            tags=["Official API"],
+            tags=["Official_API"],
             summary="Get Map Info",
             response_model=MapInfoModel,
             description="Endpoint to retrieve map information from War Thunder",
@@ -245,7 +245,7 @@ class App(FastAPI):
 
         @self.get(
             path="/map_objects",
-            tags=["Official API"],
+            tags=["Official_API"],
             summary="Get Map Objects",
             response_model=list[MapObjectModel],
             description="Endpoint to retrieve map objects from War Thunder",
@@ -722,7 +722,7 @@ class App(FastAPI):
 
         @self.get(
             path="/state",
-            tags=["Official API"],
+            tags=["Official_API"],
             summary="Get State",
             response_model=StateModel,
             description="Endpoint to retrieve the current state from War Thunder",
