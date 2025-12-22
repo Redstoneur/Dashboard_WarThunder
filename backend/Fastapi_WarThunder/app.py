@@ -5,8 +5,9 @@ Ce module définit la classe `App` (sous-classe de FastAPI) qui construit les ro
 pour les indicateurs, la carte, les objets de la carte et l'état du joueur.
 """
 
-from fastapi import FastAPI, HTTPException, Response
 import base64
+
+from fastapi import FastAPI, HTTPException, Response
 from httpx import AsyncClient
 
 from .schemas import (
@@ -38,7 +39,7 @@ class App(FastAPI):
     API_WAR_THUNDER_STATE: str = "state"
     API_WAR_THUNDER_MAP_INFO: str = "map_info.json"
     API_WAR_THUNDER_MAP_OBJ: str = "map_obj.json"
-    API_WAR_THUNDER_MAP_IMG:str = "map.img"
+    API_WAR_THUNDER_MAP_IMG: str = "map.img"
 
     def __init__(
             self,
@@ -93,6 +94,7 @@ class App(FastAPI):
         :return: None
         :except: HTTPException pour signaler les erreurs clients/serveurs relayées.
         """
+
         @self.get(
             path="/status",
             tags=["Status"],
@@ -731,7 +733,8 @@ class App(FastAPI):
             path="/map_img",
             tags=["Official_API"],
             summary="Get Map Image",
-            description="Endpoint to retrieve the map image from War Thunder (binary image). Add ?as_base64=true to get a JSON base64 string.",
+            description="Endpoint to retrieve the map image from War Thunder (binary image)."
+                        " Add ?as_base64=true to get a JSON base64 string.",
             responses={
                 200: {
                     "description": "Map image retrieved successfully",
