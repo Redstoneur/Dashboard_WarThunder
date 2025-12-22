@@ -5,7 +5,8 @@ Ce module définit la classe `App` (sous-classe de FastAPI) qui construit les ro
 pour les indicateurs, la carte, les objets de la carte et l'état du joueur.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
+import base64
 from httpx import AsyncClient
 
 from .schemas import (
@@ -37,6 +38,7 @@ class App(FastAPI):
     API_WAR_THUNDER_STATE: str = "state"
     API_WAR_THUNDER_MAP_INFO: str = "map_info.json"
     API_WAR_THUNDER_MAP_OBJ: str = "map_obj.json"
+    API_WAR_THUNDER_MAP_IMG:str = "map.img"
 
     def __init__(
             self,
@@ -66,6 +68,11 @@ class App(FastAPI):
         self.API_WAR_THUNDER_MAP_OBJ = (
             f"http://{IP_SERVER_WAR_THUNDER}:{PORT_SERVER_WAR_THUNDER}"
             f"/{self.API_WAR_THUNDER_MAP_OBJ}"
+        )
+
+        self.API_WAR_THUNDER_MAP_IMG = (
+            f"http://{IP_SERVER_WAR_THUNDER}:{PORT_SERVER_WAR_THUNDER}"
+            f"/{self.API_WAR_THUNDER_MAP_IMG}"
         )
 
         super().__init__()
@@ -717,6 +724,52 @@ class App(FastAPI):
                         ))
                     return res
 
+            except Exception as exc:
+                raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+
+        @self.get(
+            path="/map_img",
+            tags=["Official_API"],
+            summary="Get Map Image",
+            description="Endpoint to retrieve the map image from War Thunder (binary image). Add ?as_base64=true to get a JSON base64 string.",
+            responses={
+                200: {
+                    "description": "Map image retrieved successfully",
+                    "content": {
+                        "image/*": {
+                            "example": "<binary image stream>"
+                        },
+                        "application/json": {
+                            "example": {"content": "<base64 string>", "content_type": "image/png"}
+                        }
+                    }
+                },
+                502: {
+                    "description": "Upstream service unreachable",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "detail": "Upstream service unreachable: <error details>"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        async def get_map_img(as_base64: bool = False):
+            """
+            Récupère l'image de la carte depuis le serveur War Thunder et la renvoie telle quelle.
+            Si `as_base64=true` est passé en querystring, renvoie un JSON {"content": "<base64>", "content_type": "..."}.
+            """
+            try:
+                async with AsyncClient(timeout=10.0) as client:
+                    resp = await client.get(self.API_WAR_THUNDER_MAP_IMG)
+                    resp.raise_for_status()
+                    content_type = resp.headers.get("content-type", "application/octet-stream")
+                    if as_base64:
+                        b64 = base64.b64encode(resp.content).decode("ascii")
+                        return {"content": b64, "content_type": content_type}
+                    return Response(content=resp.content, media_type=content_type)
             except Exception as exc:
                 raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
 
