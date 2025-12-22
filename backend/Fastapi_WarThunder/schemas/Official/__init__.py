@@ -1,3 +1,7 @@
+"""
+Schemas for Official API responses.
+"""
+
 from .Enum import (
     ArmyEnum,
     MapObjectIcon,

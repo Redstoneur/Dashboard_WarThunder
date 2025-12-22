@@ -1,3 +1,7 @@
+"""
+FastAPI War Thunder Module
+"""
+
 from .app import App
 from .schemas import (
     ArmyEnum,
@@ -14,14 +18,13 @@ from .schemas import (
 __version__ = "1.0.0"
 __all__ = [
     "App",
-    "DamageAndStatus",
-    "EnginePropulsion",
-    "FlightControls",
-    "FlightKinematics",
-    "MapInfoCustom",
-    "MapObjectType",
+    "ArmyEnum",
     "MapObjectIcon",
+    "MapObjectType",
     "MapObjectIconBg",
-    "MapObject",
+    "IndicatorsModel",
+    "MapInfoModel",
+    "MapObjectModel",
+    "StateModel",
     "Status"
 ]

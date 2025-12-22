@@ -1,3 +1,7 @@
+"""
+Init file for Official Enum schemas.
+"""
+
 from .army_enum import ArmyEnum
 from .map_object_icon import MapObjectIcon
 from .map_object_icon_bg import MapObjectIconBg

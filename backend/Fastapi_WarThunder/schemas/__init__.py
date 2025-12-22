@@ -1,3 +1,8 @@
+"""
+Schemas package initializer. This module imports and exposes all schema models and enumerations
+ defined in the package for easy access.
+"""
+
 from .Official import (
     ArmyEnum,
     MapObjectIcon,

@@ -1,3 +1,10 @@
+"""
+Interface FastAPI pour exposer les endpoints qui relaient les données du serveur War Thunder.
+
+Ce module définit la classe `App` (sous-classe de FastAPI) qui construit les routes
+pour les indicateurs, la carte, les objets de la carte et l'état du joueur.
+"""
+
 from fastapi import FastAPI, HTTPException
 from httpx import AsyncClient
 
@@ -14,6 +21,18 @@ from .schemas import (
 
 
 class App(FastAPI):
+    """
+    Application FastAPI personnalisée pour relayer les endpoints War Thunder.
+
+    :param IP_SERVER_WAR_THUNDER: Adresse IP ou hostname du serveur War Thunder.
+    :type IP_SERVER_WAR_THUNDER: str
+    :param PORT_SERVER_WAR_THUNDER: Port d'écoute du serveur War Thunder.
+    :type PORT_SERVER_WAR_THUNDER: int
+    :return: instance de `App` prête à être lancée par Uvicorn.
+    :except: Aucune exception levée directement; les erreurs réseau sont propagées
+             en tant que `HTTPException` lors des appels aux endpoints.
+    """
+
     API_WAR_THUNDER_INDICATORS: str = "indicators"
     API_WAR_THUNDER_STATE: str = "state"
     API_WAR_THUNDER_MAP_INFO: str = "map_info.json"
@@ -24,6 +43,14 @@ class App(FastAPI):
             IP_SERVER_WAR_THUNDER: str = "localhost",
             PORT_SERVER_WAR_THUNDER: int = 8111
     ):
+        """
+        Initialise l'application et configure les URLs upstream utilisées par les endpoints.
+
+        :param IP_SERVER_WAR_THUNDER: hôte du serveur War Thunder (par défaut 'localhost').
+        :param PORT_SERVER_WAR_THUNDER: port du serveur War Thunder (par défaut 8111).
+        :return: None
+        :except: Aucun sauf erreurs internes lors de l'initialisation (rare).
+        """
         self.API_WAR_THUNDER_INDICATORS = (
             f"http://{IP_SERVER_WAR_THUNDER}:{PORT_SERVER_WAR_THUNDER}"
             f"/{self.API_WAR_THUNDER_INDICATORS}"
@@ -48,6 +75,17 @@ class App(FastAPI):
         self.add_routes()
 
     def add_routes(self):
+        """
+        Enregistre les routes HTTP sur l'instance FastAPI.
+
+        Cette méthode définit plusieurs endpoints imbriqués qui interagissent avec
+        le serveur War Thunder en amont. Chaque endpoint peut lever `HTTPException`
+        si l'upstream est injoignable ou renvoie une erreur.
+
+        :param: None (utilise les attributs de l'instance pour construire les URLs).
+        :return: None
+        :except: HTTPException pour signaler les erreurs clients/serveurs relayées.
+        """
         @self.get(
             path="/status",
             tags=["Status"],
@@ -69,6 +107,13 @@ class App(FastAPI):
             }
         )
         async def status():
+            """
+            Endpoint de vérification de l'état de l'API.
+
+            :param: None
+            :return: `Status` contenant les champs `status` (str) et `message` (str).
+            :except: Aucun; opération locale et déterministe.
+            """
             return Status(status="ok", message="API is running smoothly")
 
         @self.get(
@@ -129,6 +174,13 @@ class App(FastAPI):
             }
         )
         async def get_indicators():
+            """
+            Récupère les indicateurs depuis le serveur War Thunder et les valide via Pydantic.
+
+            :param: None
+            :return: `IndicatorsModel` avec les indicateurs remontés par l'upstream.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
             try:
                 async with AsyncClient(timeout=5.0) as client:
                     response = await client.get(self.API_WAR_THUNDER_INDICATORS)
@@ -175,6 +227,13 @@ class App(FastAPI):
             }
         )
         async def get_map_info():
+            """
+            Récupère les informations de la carte depuis le serveur War Thunder.
+
+            :param: None
+            :return: `MapInfoModel` décrivant la grille et les bornes de la carte.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
             try:
                 async with AsyncClient(timeout=5.0) as client:
                     response = await client.get(self.API_WAR_THUNDER_MAP_INFO)
@@ -625,6 +684,13 @@ class App(FastAPI):
             }
         )
         async def get_map_objects():
+            """
+            Récupère la liste des objets présents sur la carte depuis l'upstream.
+
+            :param: None
+            :return: liste d'objets `MapObjectModel`.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
             try:
                 async with AsyncClient(timeout=5.0) as client:
                     response = await client.get(self.API_WAR_THUNDER_MAP_OBJ)
@@ -714,6 +780,13 @@ class App(FastAPI):
             }
         )
         async def get_state():
+            """
+            Récupère l'état du joueur/véhicule depuis le serveur War Thunder.
+
+            :param: None
+            :return: `StateModel` représentant l'état actuel (contrôles, moteurs, etc.).
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
             try:
                 async with AsyncClient(timeout=5.0) as client:
                     response = await client.get(self.API_WAR_THUNDER_STATE)
