@@ -253,18 +253,31 @@ button, a {
 
 /* Desktop layout: grille 4 colonnes x 3 lignes avec map 2x3, compass 1x1, gyro 1x1, speed 1x2, altitude 1x2 */
 @media (min-width: 900px) {
+  /* grid cell dimensions in em; ajuste ces valeurs si tu veux des cases plus grandes ou plus petites */
   .widgets {
+    --grid-cell-w: 30em; /* largeur d'une case */
+    --grid-cell-h: 20em; /* hauteur d'une case */
+
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto auto;
+    grid-template-columns: repeat(4, var(--grid-cell-w));
+    grid-template-rows: repeat(3, var(--grid-cell-h));
     grid-template-areas:
       "map map map compass"
       "map map map gyro"
       "speed speed altitude altitude";
-    gap: 18px;
+    gap: 1rem; /* petit écart entre cases */
     align-items: start;
+    justify-content: center;
   }
-  .widget--map { grid-area: map; min-height: 480px; }
+  /* Make widgets fill the grid area (100% of width & height of their assigned cells) */
+  .widget {
+    height: 100%;
+    min-height: 0; /* allow flex children to size properly */
+    display: flex;
+    flex-direction: column;
+  }
+  /* Specific areas */
+  .widget--map { grid-area: map; }
   .widget--compass { grid-area: compass; }
   .widget--gyro { grid-area: gyro; }
   .widget--speed { grid-area: speed; }
@@ -276,18 +289,28 @@ button, a {
     padding: 20px;
   }
   .widgets {
+    --grid-cell-w: 30em; /* légèrement plus large sur grand écran */
+    --grid-cell-h: 20em; /* légèrement plus haut */
+
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto auto;
+    grid-template-columns: repeat(4, var(--grid-cell-w));
+    grid-template-rows: repeat(3, var(--grid-cell-h));
     grid-template-areas:
       "map map map compass"
       "map map map gyro"
       "speed speed altitude altitude";
-    gap: 22px;
-    max-width: var(--max-width);
+    gap: 1.125rem;
+    max-width: calc(3 * var(--grid-cell-w) + var(--grid-cell-w) + 3 * 1.125rem); /* approx pour centrer */
     align-items: start;
+    justify-content: center;
   }
-  .widget--map { grid-area: map; min-height: 720px; }
+  .widget {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .widget--map { grid-area: map; }
   .widget--speed { grid-area: speed; }
   .widget--altitude { grid-area: altitude; }
   .widget--compass { grid-area: compass; }

@@ -75,7 +75,6 @@ export default function Altitude() {
         <div className="altitude-root">
             <div className="altitude-box">
                 <div className="altitude-value">{Math.round(display).toLocaleString()} m</div>
-                <div className="altitude-label">Altitude</div>
             </div>
         </div>
     )

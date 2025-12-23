@@ -74,7 +74,6 @@ export default function Speed() {
         <div className="speed-root">
             <div className="speed-box">
                 <div className="speed-value">{Math.round(display).toLocaleString()} km/h</div>
-                <div className="speed-label">Speed</div>
             </div>
         </div>
     )
