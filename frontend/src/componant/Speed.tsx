@@ -5,6 +5,18 @@ const API_URL = '/speed'
 const POLL_MS = 200
 const SMOOTHING_TAU = 0.08
 
+// Configurable range for speed (km/h)
+const SPEED_MIN = 0
+const SPEED_MAX = 1000
+
+function valueToColor(value: number, min: number, max: number) {
+    const clamped = Math.max(min, Math.min(max, value))
+    const ratio = (clamped - min) / Math.max(1, (max - min))
+    // hue 0 = red, 120 = green
+    const hue = Math.round(ratio * 120)
+    return `hsl(${hue} 75% 35%)` // modern HSL with spaces works in browsers
+}
+
 export default function Speed() {
     const targetRef = useRef<number>(0)
     const displayRef = useRef<number>(0)
@@ -70,10 +82,12 @@ export default function Speed() {
         return () => cancelAnimationFrame(raf)
     }, [])
 
+    const color = valueToColor(display, SPEED_MIN, SPEED_MAX)
+
     return (
         <div className="speed-root">
-            <div className="speed-box">
-                <div className="speed-value">{Math.round(display).toLocaleString()} km/h</div>
+            <div className="speed-box" style={{ borderColor: color }}>
+                <div className="speed-value" style={{ color }}>{Math.round(display).toLocaleString()} km/h</div>
             </div>
         </div>
     )
