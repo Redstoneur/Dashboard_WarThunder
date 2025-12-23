@@ -7,7 +7,7 @@ const SMOOTHING_TAU = 0.12 // secondes
 
 // Configurable range for altitude (m)
 const ALT_MIN = 0
-const ALT_MAX = 10000
+const ALT_MAX = 3000
 
 function valueToColor(value: number, min: number, max: number) {
     const clamped = Math.max(min, Math.min(max, value))
