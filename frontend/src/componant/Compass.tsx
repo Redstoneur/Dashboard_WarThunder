@@ -56,12 +56,20 @@ export default function Compass() {
             }
         }
 
-        // fetch immediately then at interval
-        getOnce()
-        const id = setInterval(getOnce, POLL_MS)
+        // Polling loop qui attend la fin du fetch avant de replanifier
+        let stopped = false
+        const loop = async () => {
+            while (!stopped) {
+                await getOnce()
+                // attendre POLL_MS ms avant la prochaine itération
+                await new Promise((r) => setTimeout(r, POLL_MS))
+            }
+        }
+
+        loop()
         return () => {
             mounted = false
-            clearInterval(id)
+            stopped = true
         }
     }, [])
 

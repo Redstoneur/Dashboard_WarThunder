@@ -51,11 +51,18 @@ export function Gyroscope() {
       }
     }
 
-    getOnce()
-    const id = setInterval(getOnce, POLL_MS)
+    let stopped = false
+    const loop = async () => {
+      while (!stopped) {
+        await getOnce()
+        await new Promise((r) => setTimeout(r, POLL_MS))
+      }
+    }
+
+    loop()
     return () => {
       mounted = false
-      clearInterval(id)
+      stopped = true
     }
   }, [])
 
