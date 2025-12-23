@@ -253,10 +253,10 @@ button, a {
 
 /* Desktop layout: grille 4 colonnes x 3 lignes avec map 2x3, compass 1x1, gyro 1x1, speed 1x2, altitude 1x2 */
 @media (min-width: 900px) {
-  /* grid cell dimensions in em; ajuste ces valeurs si tu veux des cases plus grandes ou plus petites */
+  /* grid cell dimensions in em; values restored to user preference */
   .widgets {
-    --grid-cell-w: 30em; /* largeur d'une case */
-    --grid-cell-h: 20em; /* hauteur d'une case */
+    --grid-cell-w: 20em; /* largeur d'une case (restaurée) */
+    --grid-cell-h: 15em; /* hauteur d'une case (restaurée) */
 
     display: grid;
     grid-template-columns: repeat(4, var(--grid-cell-w));
@@ -275,6 +275,8 @@ button, a {
     min-height: 0; /* allow flex children to size properly */
     display: flex;
     flex-direction: column;
+    align-items: center; /* center children horizontally */
+    justify-content: center; /* center children vertically */
   }
   /* Specific areas */
   .widget--map { grid-area: map; }
@@ -289,8 +291,8 @@ button, a {
     padding: 20px;
   }
   .widgets {
-    --grid-cell-w: 30em; /* légèrement plus large sur grand écran */
-    --grid-cell-h: 20em; /* légèrement plus haut */
+    --grid-cell-w: 20em; /* largeur d'une case (restaurée) */
+    --grid-cell-h: 16em; /* hauteur d'une case (restaurée) */
 
     display: grid;
     grid-template-columns: repeat(4, var(--grid-cell-w));
@@ -309,6 +311,8 @@ button, a {
     min-height: 0;
     display: flex;
     flex-direction: column;
+    align-items: center; /* center children horizontally */
+    justify-content: center; /* center children vertically */
   }
   .widget--map { grid-area: map; }
   .widget--speed { grid-area: speed; }
