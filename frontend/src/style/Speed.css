@@ -1,0 +1,6 @@
+.speed-root{display:flex;align-items:center;justify-content:center}
+.speed-box{padding:12px;border-radius:8px;background:linear-gradient(180deg,#fff,#f7f7f7);box-shadow:0 2px 6px rgba(0,0,0,0.06);border:1px solid #e6e6e6;text-align:center;width:160px}
+.speed-value{font-weight:800;font-size:20px;color:#2b3b0b}
+.speed-label{font-size:12px;color:#666;margin-top:4px}
+.speed-error{color:#a00;font-size:12px;margin-top:6px}
+

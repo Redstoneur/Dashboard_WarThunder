@@ -1,0 +1,76 @@
+/* Simple instrument-style gyroscope */
+.gyro-root {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  color: #eaeef2;
+}
+
+.gyro-face {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: linear-gradient(#0b1220, #0f1724);
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.6), 0 6px 18px rgba(2,6,23,0.6);
+  position: relative;
+  overflow: hidden;
+  border: 3px solid rgba(255,255,255,0.06);
+}
+
+.gyro-horizon {
+  position: absolute;
+  left: -50%;
+  top: 50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(180deg, #2a6fb0 0%, #3a9adf 40%, #eaeef2 41%, #c98a3d 60%, #6b3b18 100%);
+  transform-origin: center center;
+  transition: transform 0.06s linear; /* small visual smoothing */
+}
+
+.gyro-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.gyro-crossh, .gyro-crossv {
+  position: absolute;
+  background: rgba(255,255,255,0.75);
+}
+.gyro-crossh {
+  width: 70%;
+  height: 2px;
+  opacity: 0.85;
+}
+.gyro-crossv {
+  height: 70%;
+  width: 2px;
+  opacity: 0.85;
+}
+
+.gyro-center {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 0 8px rgba(255,255,255,0.08);
+}
+
+.gyro-readouts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+.gyro-row strong {
+  color: #fff;
+  display: inline-block;
+  width: 80px;
+  text-align: right;
+}
+

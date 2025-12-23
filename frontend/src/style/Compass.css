@@ -1,0 +1,100 @@
+.compass-root{
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	gap:10px;
+	font-family:system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+.compass{
+	position:relative;
+	width:160px;
+	height:160px;
+	border-radius:50%;
+	border:4px solid #222;
+	background:linear-gradient(180deg, #fff, #f0f0f0);
+	box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+
+.compass-needle{
+	position:absolute;
+	top:50%;
+	left:50%;
+	width:4px;
+	height:70px;
+	background:linear-gradient(#d00, #900);
+	transform-origin:50% 90%;
+	margin-top:-70px; /* align base */
+	margin-left:-2px;
+	transition:transform 200ms ease-out;
+	border-radius:2px;
+}
+
+.compass-center{
+	position:absolute;
+	top:50%;
+	left:50%;
+	width:12px;
+	height:12px;
+	background:#222;
+	border-radius:50%;
+	transform:translate(-50%,-50%);
+	box-shadow:0 0 0 4px rgba(0,0,0,0.05);
+}
+
+.compass-label{
+	position:absolute;
+	font-weight:700;
+	color:#333;
+}
+
+.compass-label.north{top:10px; left:50%; transform:translateX(-50%);}
+.compass-label.south{bottom:10px; left:50%; transform:translateX(-50%);}
+.compass-label.east{right:10px; top:50%; transform:translateY(-50%);}
+.compass-label.west{left:10px; top:50%; transform:translateY(-50%);}
+.compass-label.ne{top:22px; right:22px; transform:none}
+.compass-label.nw{top:22px; left:22px; transform:none}
+.compass-label.se{bottom:22px; right:22px; transform:none}
+.compass-label.sw{bottom:22px; left:22px; transform:none}
+
+.compass-label.ne, .compass-label.nw, .compass-label.se, .compass-label.sw{
+	font-size:10px;
+	font-weight:600;
+	color:#555;
+}
+
+.compass-info{
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	gap:4px;
+}
+
+.compass-heading{
+	font-size:14px;
+	font-weight:600;
+}
+
+.compass-direction{
+	font-size:18px;
+	font-weight:800;
+	color:#111;
+}
+
+.compass-error{
+	color:#a00;
+	font-size:12px;
+}
+
+@media (max-width:420px){
+	.compass{width:120px;height:120px}
+	.compass-needle{height:55px;margin-top:-55px}
+	.compass-label.north{top:6px}
+	.compass-label.south{bottom:6px}
+	.compass-label.east{right:6px}
+	.compass-label.west{left:6px}
+	.compass-label.ne{top:10px; right:10px}
+	.compass-label.nw{top:10px; left:10px}
+	.compass-label.se{bottom:10px; right:10px}
+	.compass-label.sw{bottom:10px; left:10px}
+}
