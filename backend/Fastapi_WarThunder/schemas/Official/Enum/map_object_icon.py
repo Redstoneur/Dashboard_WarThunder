@@ -18,5 +18,5 @@ class MapObjectIcon(str, Enum):
     TORPEDO_BOAT = "TorpedoBoat"
     SHIP = "Ship"
     BOMBING_POINT = "bombing_point"
-    BOAT = "boat"
+    BOAT = "Boat"
     NONE = "none"

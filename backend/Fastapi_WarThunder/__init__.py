@@ -12,6 +12,9 @@ from .schemas import (
     MapInfoModel,
     MapObjectModel,
     StateModel,
+    CompassDirection,
+    CompassModel,
+    GyroscopeModel,
     Status
 )
 
@@ -26,5 +29,8 @@ __all__ = [
     "MapInfoModel",
     "MapObjectModel",
     "StateModel",
+    "CompassDirection",
+    "CompassModel",
+    "GyroscopeModel",
     "Status"
 ]

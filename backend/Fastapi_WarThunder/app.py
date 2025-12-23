@@ -18,6 +18,8 @@ from .schemas import (
     MapObjectIcon,
     MapObjectIconBg,
     StateModel,
+    CompassModel,
+    GyroscopeModel,
     Status
 )
 
@@ -123,7 +125,7 @@ class App(FastAPI):
             :return: `Status` contenant les champs `status` (str) et `message` (str).
             :except: Aucun; opération locale et déterministe.
             """
-            return Status(status="ok", message="API is running smoothly")
+            return self._status()
 
         @self.get(
             path="/indicators",
@@ -190,14 +192,7 @@ class App(FastAPI):
             :return: `IndicatorsModel` avec les indicateurs remontés par l'upstream.
             :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
             """
-            try:
-                async with AsyncClient(timeout=5.0) as client:
-                    response = await client.get(self.API_WAR_THUNDER_INDICATORS)
-                    response.raise_for_status()
-                    data = response.json()
-                    return IndicatorsModel(**data)
-            except Exception as exc:
-                raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+            return await self._get_indicators()
 
         @self.get(
             path="/map_info",
@@ -243,14 +238,7 @@ class App(FastAPI):
             :return: `MapInfoModel` décrivant la grille et les bornes de la carte.
             :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
             """
-            try:
-                async with AsyncClient(timeout=5.0) as client:
-                    response = await client.get(self.API_WAR_THUNDER_MAP_INFO)
-                    response.raise_for_status()
-                    data = response.json()
-                    return MapInfoModel(**data)
-            except Exception as exc:
-                raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+            return await self._get_map_info()
 
         @self.get(
             path="/map_objects",
@@ -700,34 +688,7 @@ class App(FastAPI):
             :return: liste d'objets `MapObjectModel`.
             :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
             """
-            try:
-                async with AsyncClient(timeout=5.0) as client:
-                    response = await client.get(self.API_WAR_THUNDER_MAP_OBJ)
-                    response.raise_for_status()
-                    data = response.json()
-                    res: list[MapObjectModel] = []
-                    for item in data:
-                        res.append(MapObjectModel(
-                            type=MapObjectType(item.get("type")),
-                            icon=MapObjectIcon(item.get("icon")) if item.get("icon") else None,
-                            icon_bg=MapObjectIconBg(item.get("icon_bg")) if item.get(
-                                "icon_bg") else None,
-                            color_hex=item.get("color"),
-                            color_rgb=item.get("color[]"),
-                            blink=item.get("blink"),
-                            x=item.get("x"),
-                            y=item.get("y"),
-                            dx=item.get("dx"),
-                            dy=item.get("dy"),
-                            sx=item.get("sx"),
-                            sy=item.get("sy"),
-                            ex=item.get("ex"),
-                            ey=item.get("ey")
-                        ))
-                    return res
-
-            except Exception as exc:
-                raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+            return await self._get_map_objects()
 
         @self.get(
             path="/map_img",
@@ -764,17 +725,7 @@ class App(FastAPI):
             Récupère l'image de la carte depuis le serveur War Thunder et la renvoie telle quelle.
             Si `as_base64=true` est passé en querystring, renvoie un JSON {"content": "<base64>", "content_type": "..."}.
             """
-            try:
-                async with AsyncClient(timeout=10.0) as client:
-                    resp = await client.get(self.API_WAR_THUNDER_MAP_IMG)
-                    resp.raise_for_status()
-                    content_type = resp.headers.get("content-type", "application/octet-stream")
-                    if as_base64:
-                        b64 = base64.b64encode(resp.content).decode("ascii")
-                        return {"content": b64, "content_type": content_type}
-                    return Response(content=resp.content, media_type=content_type)
-            except Exception as exc:
-                raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+            return await self._get_map_img(as_base64=as_base64)
 
         @self.get(
             path="/state",
@@ -843,43 +794,361 @@ class App(FastAPI):
             :return: `StateModel` représentant l'état actuel (contrôles, moteurs, etc.).
             :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
             """
-            try:
-                async with AsyncClient(timeout=5.0) as client:
-                    response = await client.get(self.API_WAR_THUNDER_STATE)
-                    response.raise_for_status()
-                    data = response.json()
-                    return StateModel(
-                        valid=data.get("valid", False),
-                        aileron=data.get("aileron, %"),
-                        elevator=data.get("elevator, %"),
-                        rudder=data.get("rudder, %"),
-                        flaps=data.get("flaps, %"),
-                        gear=data.get("gear, %"),
-                        airbrake=data.get("airbrake, %"),
-                        H_m=data.get("H, m"),
-                        TAS_kmh=data.get("TAS, km/h"),
-                        IAS_kmh=data.get("IAS, km/h"),
-                        M=data.get("M"),
-                        AoA_deg=data.get("AoA, deg"),
-                        AoS_deg=data.get("AoS, deg"),
-                        Ny=data.get("Ny"),
-                        Vy_ms=data.get("Vy, m/s"),
-                        Wx_deg_s=data.get("Wx, deg/s"),
-                        Mfuel_kg=data.get("Mfuel, kg"),
-                        Mfuel0_kg=data.get("Mfuel0, kg"),
-                        throttle1_percent=data.get("throttle 1, %"),
-                        RPM_throttle1_percent=data.get("RPM throttle 1, %"),
-                        mixture1_percent=data.get("mixture 1, %"),
-                        radiator1_percent=data.get("radiator 1, %"),
-                        compressor_stage1=data.get("compressor stage 1"),
-                        magneto1=data.get("magneto 1"),
-                        power1_hp=data.get("power 1, hp"),
-                        RPM1=data.get("RPM 1"),
-                        manifold_pressure1_atm=data.get("manifold pressure 1, atm"),
-                        oil_temp1_C=data.get("oil temp 1, C"),
-                        pitch1_deg=data.get("pitch 1, deg"),
-                        thrust1_kg=data.get("thrust 1, kgs"),
-                        efficiency1_percent=data.get("efficiency 1, %")
-                    )
-            except Exception as exc:
-                raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+            return await self.get_state()
+
+        @self.get(
+            path="/gyroscope",
+            tags=["Custom_API"],
+            summary="Get Gyroscope Data",
+            response_model=GyroscopeModel,
+            description="Endpoint to retrieve gyroscope data from War Thunder",
+            responses={
+                200: {
+                    "description": "Gyroscope data retrieved successfully",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "pitch": 1.5,
+                                "roll": -0.3,
+                                "yaw": 0.0,
+                                "turn": 0.2
+                            }
+                        }
+                    }
+                },
+                502: {
+                    "description": "Upstream service unreachable",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "detail": "Upstream service unreachable: <error details>"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        async def get_gyroscope():
+            """
+            Récupère les données du gyroscope depuis le serveur War Thunder.
+
+            :param: None
+            :return: `GyroscopeModel` représentant les données du gyroscope.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
+            return await self._get_gyroscope()
+
+        @self.get(
+            path="/compass",
+            tags=["Custom_API"],
+            summary="Get Compass Data",
+            response_model=CompassModel,
+            description="Endpoint to retrieve compass data from War Thunder",
+            responses={
+                200: {
+                    "description": "Compass data retrieved successfully",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "heading": 45.0,
+                                "direction": "NE"
+                            }
+                        }
+                    }
+                },
+                502: {
+                    "description": "Upstream service unreachable",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "detail": "Upstream service unreachable: <error details>"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        async def get_compass():
+            """
+            Récupère les données de la boussole depuis le serveur War Thunder.
+
+            :param: None
+            :return: `CompassModel` représentant les données de la boussole.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
+            return await self._get_compass()
+
+        @self.get(
+            path="/speed",
+            tags=["Custom_API"],
+            summary="Get Speed Data",
+            response_model=float,
+            description="Endpoint to retrieve speed data from War Thunder",
+            responses={
+                200: {
+                    "description": "Speed data retrieved successfully",
+                    "content": {
+                        "application/json": {
+                            "example": 250.0
+                        }
+                    }
+                },
+                502: {
+                    "description": "Upstream service unreachable",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "detail": "Upstream service unreachable: <error details>"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        async def get_speed():
+            """
+            Récupère la vitesse actuelle depuis le serveur War Thunder.
+
+            :param: None
+            :return: float représentant la vitesse actuelle en km/h.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
+            return await self._get_speed()
+
+        @self.get(
+            path="/altitude",
+            tags=["Custom_API"],
+            summary="Get Altitude Data",
+            response_model=float,
+            description="Endpoint to retrieve altitude data from War Thunder",
+            responses={
+                200: {
+                    "description": "Altitude data retrieved successfully",
+                    "content": {
+                        "application/json": {
+                            "example": 1500.0
+                        }
+                    }
+                },
+                502: {
+                    "description": "Upstream service unreachable",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "detail": "Upstream service unreachable: <error details>"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        async def get_altitude():
+            """
+            Récupère l'altitude actuelle depuis le serveur War Thunder.
+
+            :param: None
+            :return: float représentant l'altitude actuelle en mètres.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
+            return await self._get_altitude()
+
+    @staticmethod
+    def _status() -> Status:
+        """
+        Endpoint de vérification de l'état de l'API.
+
+        :param: None
+        :return: `Status` contenant les champs `status` (str) et `message` (str).
+        :except: Aucun; opération locale et déterministe.
+        """
+        return Status(status="ok", message="API is running smoothly")
+
+    async def _get_indicators(self) -> IndicatorsModel:
+        """
+        Récupère les indicateurs depuis le serveur War Thunder et les valide via Pydantic.
+
+        :param: None
+        :return: `IndicatorsModel` avec les indicateurs remontés par l'upstream.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        try:
+            async with AsyncClient(timeout=5.0) as client:
+                response = await client.get(self.API_WAR_THUNDER_INDICATORS)
+                response.raise_for_status()
+                data = response.json()
+                return IndicatorsModel(**data)
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+
+    async def _get_map_info(self) -> MapInfoModel:
+        """
+        Récupère les informations de la carte depuis le serveur War Thunder.
+
+        :param: None
+        :return: `MapInfoModel` décrivant la grille et les bornes de la carte.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        try:
+            async with AsyncClient(timeout=5.0) as client:
+                response = await client.get(self.API_WAR_THUNDER_MAP_INFO)
+                response.raise_for_status()
+                data = response.json()
+                return MapInfoModel(**data)
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+
+    async def _get_map_objects(self) -> list[MapObjectModel]:
+        """
+        Récupère la liste des objets présents sur la carte depuis l'upstream.
+
+        :param: None
+        :return: liste d'objets `MapObjectModel`.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        try:
+            async with AsyncClient(timeout=5.0) as client:
+                response = await client.get(self.API_WAR_THUNDER_MAP_OBJ)
+                response.raise_for_status()
+                data = response.json()
+                res: list[MapObjectModel] = []
+                for item in data:
+                    res.append(MapObjectModel(
+                        type=MapObjectType(item.get("type")),
+                        icon=MapObjectIcon(item.get("icon")) if item.get("icon") else None,
+                        icon_bg=MapObjectIconBg(item.get("icon_bg")) if item.get(
+                            "icon_bg") else None,
+                        color_hex=item.get("color"),
+                        color_rgb=item.get("color[]"),
+                        blink=item.get("blink"),
+                        x=item.get("x"),
+                        y=item.get("y"),
+                        dx=item.get("dx"),
+                        dy=item.get("dy"),
+                        sx=item.get("sx"),
+                        sy=item.get("sy"),
+                        ex=item.get("ex"),
+                        ey=item.get("ey")
+                    ))
+                return res
+
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+
+    async def _get_map_img(self, as_base64: bool = False):
+        """
+        Récupère l'image de la carte depuis le serveur War Thunder et la renvoie telle quelle.
+        Si `as_base64=true` est passé en querystring, renvoie un JSON {"content": "<base64>", "content_type": "..."}.
+
+        :param as_base64: bool indiquant si la réponse doit être encodée en base64.
+        :return: Response avec le contenu binaire de l'image ou dict avec base64.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        try:
+            async with AsyncClient(timeout=10.0) as client:
+                resp = await client.get(self.API_WAR_THUNDER_MAP_IMG)
+                resp.raise_for_status()
+                content_type = resp.headers.get("content-type", "application/octet-stream")
+                if as_base64:
+                    b64 = base64.b64encode(resp.content).decode("ascii")
+                    return {"content": b64, "content_type": content_type}
+                return Response(content=resp.content, media_type=content_type)
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+
+    async def get_state(self) -> StateModel:
+        """
+        Récupère l'état du joueur/véhicule depuis le serveur War Thunder.
+
+        :param: None
+        :return: `StateModel` représentant l'état actuel (contrôles, moteurs, etc.).
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        try:
+            async with AsyncClient(timeout=5.0) as client:
+                response = await client.get(self.API_WAR_THUNDER_STATE)
+                response.raise_for_status()
+                data = response.json()
+                return StateModel(
+                    valid=data.get("valid", False),
+                    aileron=data.get("aileron, %"),
+                    elevator=data.get("elevator, %"),
+                    rudder=data.get("rudder, %"),
+                    flaps=data.get("flaps, %"),
+                    gear=data.get("gear, %"),
+                    airbrake=data.get("airbrake, %"),
+                    H_m=data.get("H, m"),
+                    TAS_kmh=data.get("TAS, km/h"),
+                    IAS_kmh=data.get("IAS, km/h"),
+                    M=data.get("M"),
+                    AoA_deg=data.get("AoA, deg"),
+                    AoS_deg=data.get("AoS, deg"),
+                    Ny=data.get("Ny"),
+                    Vy_ms=data.get("Vy, m/s"),
+                    Wx_deg_s=data.get("Wx, deg/s"),
+                    Mfuel_kg=data.get("Mfuel, kg"),
+                    Mfuel0_kg=data.get("Mfuel0, kg"),
+                    throttle1_percent=data.get("throttle 1, %"),
+                    RPM_throttle1_percent=data.get("RPM throttle 1, %"),
+                    mixture1_percent=data.get("mixture 1, %"),
+                    radiator1_percent=data.get("radiator 1, %"),
+                    compressor_stage1=data.get("compressor stage 1"),
+                    magneto1=data.get("magneto 1"),
+                    power1_hp=data.get("power 1, hp"),
+                    RPM1=data.get("RPM 1"),
+                    manifold_pressure1_atm=data.get("manifold pressure 1, atm"),
+                    oil_temp1_C=data.get("oil temp 1, C"),
+                    pitch1_deg=data.get("pitch 1, deg"),
+                    thrust1_kg=data.get("thrust 1, kgs"),
+                    efficiency1_percent=data.get("efficiency 1, %")
+                )
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"Upstream service unreachable: {exc}")
+
+    async def _get_gyroscope(self) -> GyroscopeModel:
+        """
+        Récupère les données du gyroscope depuis le serveur War Thunder.
+
+        :param: None
+        :return: `GyroscopeModel` représentant les données du gyroscope.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        indicators: IndicatorsModel = await self._get_indicators()
+        return GyroscopeModel(
+            pitch=indicators.aviahorizon_roll,
+            roll=indicators.aviahorizon_pitch,
+            yaw=indicators.bank,
+            turn=indicators.turn
+        )
+
+    async def _get_compass(self) -> CompassModel:
+        """
+        Récupère les données de la boussole depuis le serveur War Thunder.
+
+        :param: None
+        :return: `CompassModel` représentant les données de la boussole.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        indicators: IndicatorsModel = await self._get_indicators()
+        return CompassModel(heading=indicators.compass)
+
+    async def _get_speed(self) -> float:
+        """
+        Récupère la vitesse depuis le serveur War Thunder.
+
+        :param: None
+        :return: vitesse en km/h.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        state: StateModel = await self.get_state()
+        return state.TAS_kmh
+
+    async def _get_altitude(self) -> float:
+        """
+        Récupère l'altitude depuis le serveur War Thunder.
+
+        :param: None
+        :return: altitude en mètres.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        state: StateModel = await self.get_state()
+        return state.H_m
