@@ -1154,11 +1154,17 @@ class App(FastAPI):
         :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
         """
         indicators: IndicatorsModel = await self._get_indicators()
+        turn: float
+        if indicators.turn is None:
+            state: StateModel = await self.get_state()
+            turn = state.rudder / 100
+        else:
+            turn = indicators.turn
         return GyroscopeModel(
             pitch=indicators.aviahorizon_roll,
             roll=indicators.aviahorizon_pitch,
             yaw=indicators.bank,
-            turn=indicators.turn
+            turn=turn
         )
 
     async def _get_compass(self) -> CompassModel:

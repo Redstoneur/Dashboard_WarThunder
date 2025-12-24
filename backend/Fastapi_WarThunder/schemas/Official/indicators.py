@@ -2,8 +2,10 @@
 Modèle des indicateurs de vol et de véhicule envoyés par l'API War Thunder.
 """
 
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
+
 from .Enum.army_enum import ArmyEnum
 
 
@@ -78,29 +80,65 @@ class IndicatorsModel(BaseModel):
     valid: bool
     army: ArmyEnum
     type: str  # Nom de l'avion ou véhicule
-    speed: Optional[float]  # km/h ?
-    vario: Optional[float]  # m/s
-    altitude_hour: Optional[float]  # m
-    altitude_min: Optional[float]  # m
-    altitude_10k: Optional[float]  # m
-    aviahorizon_roll: Optional[float]  # deg
-    aviahorizon_pitch: Optional[float]  # deg
-    bank: Optional[float]  # deg
-    turn: Optional[float]  # deg/s
-    compass: Optional[float]  # deg
-    compass2: Optional[float]  # deg
-    manifold_pressure: Optional[float]  # atm
-    rpm: Optional[float]
-    oil_pressure: Optional[float]
-    oil_temperature: Optional[float]  # °C
-    head_temperature: Optional[float]  # °C
-    head_temperature1: Optional[float]  # °C
-    fuel: Optional[float]  # kg
-    fuel_pressure: Optional[float]
-    gear_lamp_down: Optional[int]
-    gear_lamp_up: Optional[int]
-    gear_lamp_off: Optional[int]
-    blister1: Optional[int]
-    blister2: Optional[int]
-    blister3: Optional[int]
-    blister4: Optional[int]
+    speed: Optional[float] = None  # km/h ?
+    pedals: Optional[float] = None
+    pedals1: Optional[float] = None
+    pedals2: Optional[float] = None
+    pedals3: Optional[float] = None
+    pedals4: Optional[float] = None
+    pedals5: Optional[float] = None
+    stick_elevator: Optional[float] = None
+    stick_ailerons2: Optional[float] = None
+    vario: Optional[float] = None  # m/s
+    altitude_hour: Optional[float] = None  # m
+    altitude_min: Optional[float] = None  # m
+    altitude_10k: Optional[float] = None  # m
+    altitude1_min: Optional[float] = None  # m
+    altitude1_10k: Optional[float] = None  # m
+    aviahorizon_roll: Optional[float] = None  # deg
+    aviahorizon_pitch: Optional[float] = None  # deg
+    aviahorizon_roll1: Optional[float] = None  # deg
+    aviahorizon_pitch1: Optional[float] = None  # deg
+    bank: Optional[float] = None  # deg
+    turn: Optional[float] = None  # deg/s
+    compass: Optional[float] = None  # deg
+    compass1: Optional[float] = None  # deg
+    compass2: Optional[float] = None  # deg
+    manifold_pressure: Optional[float] = None  # atm
+    clock_hour: Optional[float] = None
+    clock_min: Optional[float] = None
+    clock_sec: Optional[float] = None
+    rpm: Optional[float] = None
+    rpm_min: Optional[float] = None
+    rpm_hour: Optional[float] = None
+    water_temperature: Optional[float] = None
+    oil_pressure: Optional[float] = None
+    oil_temperature: Optional[float] = None  # °C
+    head_temperature: Optional[float] = None  # °C
+    head_temperature1: Optional[float] = None  # °C
+    fuel: Optional[float] = None  # kg
+    fuel1: Optional[float] = None  # kg
+    fuel_pressure: Optional[float] = None
+    airbrake_lever: Optional[float] = None
+    airbrake_indicator: Optional[float] = None
+    gears: Optional[float] = None
+    gear_lamp_down: Optional[int] = None
+    gear_lamp_up: Optional[int] = None
+    gear_lamp_off: Optional[int] = None
+    trimmer: Optional[float] = None
+    throttle: Optional[float] = None
+    weapon1: Optional[float] = None
+    weapon2: Optional[float] = None
+    weapon3: Optional[float] = None
+    weapon4: Optional[float] = None
+    mach: Optional[float] = None
+    g_meter: Optional[float] = None
+    g_meter_max: Optional[float] = None
+    aoa: Optional[float] = None
+    blister1: Optional[int] = None
+    blister2: Optional[int] = None
+    blister3: Optional[int] = None
+    blister4: Optional[int] = None
+    blister5: Optional[int] = None
+    blister6: Optional[int] = None
+    blister7: Optional[int] = None
