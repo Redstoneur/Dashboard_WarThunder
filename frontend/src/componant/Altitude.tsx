@@ -5,9 +5,14 @@ const API_URL = '/altitude'
 const POLL_MS = 500
 const SMOOTHING_TAU = 0.12 // secondes
 
-// Configurable range for altitude (m)
+// Configurable range pour altitude (m)
 const ALT_MIN = 0
 const ALT_MAX = 3000
+
+type AltitudeResp = {
+    altitude_meters?: number | null
+    gear_deployed?: boolean | null
+}
 
 function valueToColor(value: number, min: number, max: number) {
     const clamped = Math.max(min, Math.min(max, value))
@@ -19,7 +24,72 @@ function valueToColor(value: number, min: number, max: number) {
 export default function Altitude() {
     const targetRef = useRef<number>(0)
     const displayRef = useRef<number>(0)
+    const gearRef = useRef<boolean>(true)
     const [display, setDisplay] = useState<number>(0)
+
+    // Audio alarm refs
+    const audioCtxRef = useRef<AudioContext | null>(null)
+    const oscRef = useRef<OscillatorNode | null>(null)
+    const gainRef = useRef<GainNode | null>(null)
+    const alarmOnRef = useRef<boolean>(false)
+
+    // Helper: démarrer l'alarme
+    const startAlarm = async () => {
+        if (alarmOnRef.current) return
+        try {
+            // typed access to possible AudioContext constructors (évite 'any')
+            const globalWithAudio = window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }
+            const AudioCtor = globalWithAudio.AudioContext ?? globalWithAudio.webkitAudioContext
+            if (!AudioCtor) {
+                console.warn('[Altitude] AudioContext not available in this environment')
+                return
+            }
+            const ctx = audioCtxRef.current ?? new AudioCtor()
+            audioCtxRef.current = ctx
+            // resume may require a user gesture in modern browsers
+            try {
+                await ctx.resume()
+            } catch (e) {
+                console.warn('[Altitude] audio resume failed:', e)
+            }
+            const osc = ctx.createOscillator()
+            const gain = ctx.createGain()
+            osc.type = 'sine'
+            osc.frequency.value = 880 // A high-pitched alert tone
+            gain.gain.value = 0.04 // faible volume
+            osc.connect(gain)
+            gain.connect(ctx.destination)
+            osc.start()
+            oscRef.current = osc
+            gainRef.current = gain
+            alarmOnRef.current = true
+            console.debug('[Altitude] alarm started')
+        } catch (err) {
+            console.warn('[Altitude] cannot start alarm:', err)
+        }
+    }
+
+    // Helper: stopper l'alarme
+    const stopAlarm = () => {
+        if (!alarmOnRef.current) return
+        try {
+            oscRef.current?.stop()
+            oscRef.current?.disconnect()
+            gainRef.current?.disconnect()
+        } catch {
+            // ignore
+        }
+        oscRef.current = null
+        gainRef.current = null
+        alarmOnRef.current = false
+        // suspend plutôt que close pour éviter coûts de recreation fréquente
+        try {
+            audioCtxRef.current?.suspend().catch(() => {})
+        } catch {
+            // ignore
+        }
+        console.debug('[Altitude] alarm stopped')
+    }
 
     useEffect(() => {
         let mounted = true
@@ -27,25 +97,41 @@ export default function Altitude() {
             try {
                 const res = await fetch(API_URL)
                 if (!res.ok) {
-                    // défaut : afficher 0 si l'API renvoie une erreur
                     if (mounted) console.debug(`[Altitude] HTTP ${res.status}`)
+                    // defaults sûrs
                     targetRef.current = 0
+                    gearRef.current = true
                     displayRef.current = 0
-                    if (mounted) setDisplay(0)
+                    if (mounted) {
+                        setDisplay(0)
+                    }
+                    stopAlarm()
                     return
                 }
-                const text = await res.text()
-                const val = Number(text)
-                if (!Number.isFinite(val)) targetRef.current = 0
-                else targetRef.current = val
-                console.debug('[Altitude] data ok')
+                const data: AltitudeResp = await res.json()
+                const raw = Number(data?.altitude_meters ?? 0)
+                const altitude = Number.isFinite(raw) ? raw : 0
+                const gear = data?.gear_deployed ?? true
+                targetRef.current = altitude
+                gearRef.current = gear
+                console.debug('[Altitude] data ok', { altitude, gear: gearRef.current })
+                // alarm control based on freshly fetched (raw) altitude
+                if (altitude < 100 && !gearRef.current) {
+                    startAlarm()
+                } else {
+                    stopAlarm()
+                }
+                if (mounted) setDisplay((d) => d) // no-op to keep parity (safe)
             } catch (err: unknown) {
-                // en cas d'erreur réseau, afficher la valeur par défaut
                 const msg = err instanceof Error ? err.message : String(err)
                 console.warn(`[Altitude] fetch error: ${msg}`)
                 targetRef.current = 0
+                gearRef.current = true
                 displayRef.current = 0
-                if (mounted) setDisplay(0)
+                if (mounted) {
+                    setDisplay(0)
+                }
+                stopAlarm()
             }
         }
 
@@ -64,6 +150,7 @@ export default function Altitude() {
         }
     }, [])
 
+    // smoothing display loop
     useEffect(() => {
         let raf = 0
         let last = performance.now()
@@ -80,6 +167,19 @@ export default function Altitude() {
         }
         raf = requestAnimationFrame(step)
         return () => cancelAnimationFrame(raf)
+    }, [])
+
+    // cleanup audio context on unmount
+    useEffect(() => {
+        return () => {
+            stopAlarm()
+            try {
+                audioCtxRef.current?.close().catch(() => {})
+            } catch {
+                // ignore
+            }
+            audioCtxRef.current = null
+        }
     }, [])
 
     const color = valueToColor(display, ALT_MIN, ALT_MAX)
