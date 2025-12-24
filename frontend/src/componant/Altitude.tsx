@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react'
+import {useEffect, useRef, useState, useCallback} from 'react'
 import '../style/Altitude.css'
 
 const API_URL = '/altitude'
@@ -8,6 +8,9 @@ const SMOOTHING_TAU = 0.12 // secondes
 // Configurable range pour altitude (m)
 const ALT_MIN = 0
 const ALT_MAX = 3000
+// Alarm thresholds (m)
+const ALT_ALARM_INTERMITTENT_START = 100 // début de l'intermittence
+const ALT_ALARM_CONTINUOUS_START = 50 // début du son continu
 
 const ALARM_STORAGE_KEY = 'altitude.alarmEnabled'
 
@@ -50,65 +53,151 @@ export default function Altitude() {
     const oscRef = useRef<OscillatorNode | null>(null)
     const gainRef = useRef<GainNode | null>(null)
     const alarmOnRef = useRef<boolean>(false)
+    // mode: 'off' | 'intermittent' | 'continuous'
+    const alarmModeRef = useRef<'off' | 'intermittent' | 'continuous'>('off')
+    const pulseTimerRef = useRef<number | null>(null)
 
-    // Helper: démarrer l'alarme
-    const startAlarm = async () => {
-        if (alarmOnRef.current) return
-        if (!alarmEnabledRef.current) return // ne pas démarrer si l'utilisateur a désactivé l'alarme
+    // Pulse configuration
+    const MAX_INTERVAL_MS = 1000 // at 100m -> 1s between beeps
+    const MIN_INTERVAL_MS = 0 // at 50m -> continuous
+    const PULSE_DURATION_MS = 150 // how long each beep lasts
+
+    // compute interval (ms) for a given altitude in [ALT_ALARM_CONTINUOUS_START, ALT_ALARM_INTERMITTENT_START]
+    const intervalForAltitude = (alt: number) => {
+        if (alt >= ALT_ALARM_INTERMITTENT_START) return MAX_INTERVAL_MS
+        if (alt <= ALT_ALARM_CONTINUOUS_START) return MIN_INTERVAL_MS
+        const ratio = (alt - ALT_ALARM_CONTINUOUS_START) / (ALT_ALARM_INTERMITTENT_START - ALT_ALARM_CONTINUOUS_START)
+        return Math.round(ratio * MAX_INTERVAL_MS)
+    }
+
+    // ensure audio graph exists (oscillator + gain)
+    const ensureAudio = useCallback(async () => {
+        // respect alarmEnabledRef at call sites
         try {
-            // typed access to possible AudioContext constructors (évite 'any')
             const globalWithAudio = window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }
             const AudioCtor = globalWithAudio.AudioContext ?? globalWithAudio.webkitAudioContext
-            if (!AudioCtor) {
-                console.warn('[Altitude] AudioContext not available in this environment')
-                return
-            }
+            if (!AudioCtor) return null
             const ctx = audioCtxRef.current ?? new AudioCtor()
             audioCtxRef.current = ctx
-            // resume may require a user gesture in modern browsers
-            try {
-                await ctx.resume()
-            } catch (e) {
-                console.warn('[Altitude] audio resume failed:', e)
+            try { await ctx.resume() } catch (err) { console.debug('[Altitude] audio resume failed', err) }
+
+            if (!oscRef.current) {
+                const osc = ctx.createOscillator()
+                const gain = ctx.createGain()
+                osc.type = 'sine'
+                osc.frequency.value = 880
+                // start with 0 gain
+                gain.gain.value = 0
+                osc.connect(gain)
+                gain.connect(ctx.destination)
+                osc.start()
+                oscRef.current = osc
+                gainRef.current = gain
             }
-            const osc = ctx.createOscillator()
-            const gain = ctx.createGain()
-            osc.type = 'sine'
-            osc.frequency.value = 880 // A high-pitched alert tone
-            gain.gain.value = 0.04 // faible volume
-            osc.connect(gain)
-            gain.connect(ctx.destination)
-            osc.start()
-            oscRef.current = osc
-            gainRef.current = gain
-            alarmOnRef.current = true
-            console.debug('[Altitude] alarm started')
+            return ctx
         } catch (err) {
-            console.warn('[Altitude] cannot start alarm:', err)
+            console.warn('[Altitude] ensureAudio failed', err)
+            return null
         }
-    }
+    }, [])
+
+    // perform a single pulse: raise gain briefly then lower
+    const doPulse = useCallback(() => {
+        const ctx = audioCtxRef.current
+        const gain = gainRef.current
+        if (!ctx || !gain) return
+        const now = ctx.currentTime
+        const vol = 0.06
+        try {
+            gain.gain.cancelScheduledValues(now)
+            gain.gain.setValueAtTime(0, now)
+            // ramp up quickly
+            gain.gain.linearRampToValueAtTime(vol, now + 0.01)
+            // hold for pulse duration
+            gain.gain.setValueAtTime(vol, now + PULSE_DURATION_MS / 1000)
+            // ramp down quickly
+            gain.gain.linearRampToValueAtTime(0, now + PULSE_DURATION_MS / 1000 + 0.02)
+        } catch (err) {
+            console.debug('[Altitude] doPulse scheduling failed', err)
+            // fallback naive set
+            try { gain.gain.value = vol } catch (e) { console.debug('[Altitude] set gain fallback failed', e) }
+            setTimeout(() => { try { gain.gain.value = 0 } catch (e) { console.debug('[Altitude] reset gain failed', e) } }, PULSE_DURATION_MS)
+        }
+    }, [])
+
+    const enterContinuous = useCallback(async () => {
+        if (!alarmEnabledRef.current) return
+        const ctx = await ensureAudio()
+        if (!ctx || !gainRef.current) return
+        // cancel pulses
+        if (pulseTimerRef.current) {
+            clearTimeout(pulseTimerRef.current)
+            pulseTimerRef.current = null
+        }
+        alarmModeRef.current = 'continuous'
+        alarmOnRef.current = true
+        try {
+            const now = ctx.currentTime
+            gainRef.current.gain.cancelScheduledValues(now)
+            gainRef.current.gain.setValueAtTime(0.06, now)
+        } catch (e) { console.debug('[Altitude] enterContinuous set gain failed', e) }
+        console.debug('[Altitude] alarm continuous')
+    }, [ensureAudio])
+
+    const enterIntermittent = useCallback(async (intervalMs: number) => {
+        if (!alarmEnabledRef.current) return
+        const ctx = await ensureAudio()
+        if (!ctx || !gainRef.current) return
+        if (intervalMs <= PULSE_DURATION_MS) {
+            // effectively continuous
+            await enterContinuous()
+            return
+        }
+        // stop any existing timer
+        if (pulseTimerRef.current) {
+            clearTimeout(pulseTimerRef.current)
+            pulseTimerRef.current = null
+        }
+        alarmModeRef.current = 'intermittent'
+        alarmOnRef.current = true
+
+        const loopPulse = () => {
+            // do a pulse now
+            doPulse()
+            // schedule next
+            pulseTimerRef.current = window.setTimeout(() => {
+                // if mode changed, bail
+                if (alarmModeRef.current !== 'intermittent') return
+                loopPulse()
+            }, intervalMs)
+        }
+
+        loopPulse()
+        console.debug('[Altitude] alarm intermittent interval=', intervalMs)
+    }, [ensureAudio, doPulse, enterContinuous])
 
     // Helper: stopper l'alarme
-    const stopAlarm = () => {
-        if (!alarmOnRef.current) return
-        try {
-            oscRef.current?.stop()
-            oscRef.current?.disconnect()
-            gainRef.current?.disconnect()
-        } catch {
-            // ignore
-        }
-        oscRef.current = null
-        gainRef.current = null
-        alarmOnRef.current = false
-        // suspend plutôt que close pour éviter coûts de recreation fréquente
-        try {
-            audioCtxRef.current?.suspend().catch(() => {})
-        } catch {
-            // ignore
-        }
-        console.debug('[Altitude] alarm stopped')
-    }
+    const stopAlarm = useCallback(() => {
+         if (!alarmOnRef.current && alarmModeRef.current === 'off') return
+         // clear pulse timer
+         if (pulseTimerRef.current) {
+             clearTimeout(pulseTimerRef.current)
+             pulseTimerRef.current = null
+         }
+         alarmModeRef.current = 'off'
+         alarmOnRef.current = false
+         try {
+             // stop oscillator and disconnect
+             try { oscRef.current?.stop() } catch (e) { console.debug('[Altitude] osc stop failed', e) }
+             try { oscRef.current?.disconnect() } catch (e) { console.debug('[Altitude] osc disconnect failed', e) }
+             try { gainRef.current?.disconnect() } catch (e) { console.debug('[Altitude] gain disconnect failed', e) }
+         } catch (e) { console.debug('[Altitude] stopAlarm outer failed', e) }
+         oscRef.current = null
+         gainRef.current = null
+         // suspend audio context to save resources
+         try { audioCtxRef.current?.suspend().catch((e) => { console.debug('[Altitude] suspend failed', e) }) } catch (e) { console.debug('[Altitude] suspend outer failed', e) }
+         console.debug('[Altitude] alarm stopped')
+    }, [])
 
     useEffect(() => {
         let mounted = true
@@ -135,8 +224,16 @@ export default function Altitude() {
                 gearRef.current = gear
                 console.debug('[Altitude] data ok', { altitude, gear: gearRef.current })
                 // alarm control based on freshly fetched (raw) altitude
-                if (alarmEnabledRef.current && altitude < 100 && !gearRef.current) {
-                    startAlarm()
+                if (alarmEnabledRef.current && !gearRef.current && altitude < 100) {
+                    // between 100 and 50 -> intermittent; below 50 -> continuous
+                    if (altitude <= 50) {
+                        // continuous
+                        enterContinuous().catch(() => {})
+                    } else {
+                        // intermittent: interval scales from 1000ms (at 100m) down to 0ms at 50m
+                        const interval = intervalForAltitude(altitude)
+                        enterIntermittent(interval).catch(() => {})
+                    }
                 } else {
                     stopAlarm()
                 }
@@ -167,7 +264,7 @@ export default function Altitude() {
             mounted = false
             stopped = true
         }
-    }, [])
+    }, [enterContinuous, enterIntermittent, stopAlarm])
 
     // persist alarmEnabled to localStorage when it changes
     useEffect(() => {
@@ -208,7 +305,7 @@ export default function Altitude() {
             }
             audioCtxRef.current = null
         }
-    }, [])
+    }, [stopAlarm])
 
     const color = valueToColor(display, ALT_MIN, ALT_MAX)
 
