@@ -9,6 +9,8 @@ const SMOOTHING_TAU = 0.12 // secondes
 const ALT_MIN = 0
 const ALT_MAX = 3000
 
+const ALARM_STORAGE_KEY = 'altitude.alarmEnabled'
+
 type AltitudeResp = {
     altitude_meters?: number | null
     gear_deployed?: boolean | null
@@ -27,6 +29,22 @@ export default function Altitude() {
     const gearRef = useRef<boolean>(true)
     const [display, setDisplay] = useState<number>(0)
 
+    // Alarm enabled state (persisted)
+    const [alarmEnabled, setAlarmEnabled] = useState<boolean>(() => {
+        try {
+            const v = localStorage.getItem(ALARM_STORAGE_KEY)
+            return v === null ? true : v === 'true'
+        } catch {
+            return true
+        }
+    })
+    const alarmEnabledRef = useRef<boolean>(alarmEnabled)
+
+    // Sync ref when alarmEnabled changes (avoid updating ref during render)
+    useEffect(() => {
+        alarmEnabledRef.current = alarmEnabled
+    }, [alarmEnabled])
+
     // Audio alarm refs
     const audioCtxRef = useRef<AudioContext | null>(null)
     const oscRef = useRef<OscillatorNode | null>(null)
@@ -36,6 +54,7 @@ export default function Altitude() {
     // Helper: démarrer l'alarme
     const startAlarm = async () => {
         if (alarmOnRef.current) return
+        if (!alarmEnabledRef.current) return // ne pas démarrer si l'utilisateur a désactivé l'alarme
         try {
             // typed access to possible AudioContext constructors (évite 'any')
             const globalWithAudio = window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }
@@ -116,7 +135,7 @@ export default function Altitude() {
                 gearRef.current = gear
                 console.debug('[Altitude] data ok', { altitude, gear: gearRef.current })
                 // alarm control based on freshly fetched (raw) altitude
-                if (altitude < 100 && !gearRef.current) {
+                if (alarmEnabledRef.current && altitude < 100 && !gearRef.current) {
                     startAlarm()
                 } else {
                     stopAlarm()
@@ -149,6 +168,15 @@ export default function Altitude() {
             stopped = true
         }
     }, [])
+
+    // persist alarmEnabled to localStorage when it changes
+    useEffect(() => {
+        try {
+            localStorage.setItem(ALARM_STORAGE_KEY, alarmEnabled ? 'true' : 'false')
+        } catch {
+            // ignore storage errors
+        }
+    }, [alarmEnabled])
 
     // smoothing display loop
     useEffect(() => {
@@ -192,10 +220,25 @@ export default function Altitude() {
         console.debug(`[Altitude] display=${display.toFixed(2)} color=${color}`)
     }, [display, color])
 
+    const toggleAlarm = () => setAlarmEnabled((v) => !v)
+
     return (
         <div className="altitude-root">
             <div className="altitude-box" style={{ borderColor: color, boxShadow: `0 8px 20px ${shadowColor}` }}>
                 <div className="altitude-value" style={{ color }}>{Math.round(display).toLocaleString()} m</div>
+
+                {/* Small controls area: toggle alarm on/off */}
+                <div className="altitude-controls">
+                    <button
+                        type="button"
+                        className={`alarm-toggle ${alarmEnabled ? 'on' : 'off'}`}
+                        aria-pressed={alarmEnabled}
+                        onClick={toggleAlarm}
+                    >
+                        {alarmEnabled ? 'Alarme: activée' : 'Alarme: désactivée'}
+                    </button>
+                </div>
+
             </div>
         </div>
     )

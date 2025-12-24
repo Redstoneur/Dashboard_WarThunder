@@ -4,6 +4,12 @@
 .altitude-label{font-size:12px;color:#666;margin-top:4px}
 .altitude-error{color:#a00;font-size:12px;margin-top:6px}
 
+/* Controls */
+.altitude-controls{margin-top:10px;display:flex;justify-content:center}
+.alarm-toggle{padding:6px 10px;border-radius:8px;border:1px solid rgba(11,59,87,0.12);background:transparent;color:#0b3b57;cursor:pointer;font-weight:600;font-size:0.85rem;transition:background 150ms ease,color 150ms ease,border-color 150ms ease}
+.alarm-toggle.on{background:linear-gradient(180deg, rgba(37,99,235,0.10), rgba(37,99,235,0.06));border-color:rgba(37,99,235,0.22);color:#0b3b57}
+.alarm-toggle.off{opacity:0.8}
+
 /* Desktop: make the box fill its grid cell and increase typography */
 @media (min-width: 900px) {
   .altitude-box{
