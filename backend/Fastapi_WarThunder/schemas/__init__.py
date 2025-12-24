@@ -13,6 +13,7 @@ from .Official import (
     MapObjectModel,
     StateModel
 )
+from .altitude import AltitudeModel
 from .compass import CompassDirection, CompassModel
 from .gyroscope import GyroscopeModel
 from .status import Status
@@ -29,6 +30,7 @@ __all__ = [
     "MapObjectType",
     "MapObjectIcon",
     "MapObjectIconBg",
+    "AltitudeModel",
     "CompassDirection",
     "CompassModel",
     "GyroscopeModel",

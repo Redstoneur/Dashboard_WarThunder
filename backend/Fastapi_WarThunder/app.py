@@ -18,6 +18,7 @@ from .schemas import (
     MapObjectIcon,
     MapObjectIconBg,
     StateModel,
+    AltitudeModel,
     CompassModel,
     GyroscopeModel,
     Status
@@ -98,7 +99,7 @@ class App(FastAPI):
         """
 
         @self.get(
-            path="/status",
+            path="/api/v1/status",
             tags=["Status"],
             summary="Get API status",
             response_model=Status,
@@ -128,7 +129,7 @@ class App(FastAPI):
             return self._status()
 
         @self.get(
-            path="/indicators",
+            path="/api/v1/indicators",
             tags=["Official_API"],
             summary="Get Indicators",
             response_model=IndicatorsModel,
@@ -195,7 +196,7 @@ class App(FastAPI):
             return await self._get_indicators()
 
         @self.get(
-            path="/map_info",
+            path="/api/v1/map_info",
             tags=["Official_API"],
             summary="Get Map Info",
             response_model=MapInfoModel,
@@ -241,7 +242,7 @@ class App(FastAPI):
             return await self._get_map_info()
 
         @self.get(
-            path="/map_objects",
+            path="/api/v1/map_objects",
             tags=["Official_API"],
             summary="Get Map Objects",
             response_model=list[MapObjectModel],
@@ -691,7 +692,7 @@ class App(FastAPI):
             return await self._get_map_objects()
 
         @self.get(
-            path="/map_img",
+            path="/api/v1/map_img",
             tags=["Official_API"],
             summary="Get Map Image",
             description="Endpoint to retrieve the map image from War Thunder (binary image)."
@@ -728,7 +729,7 @@ class App(FastAPI):
             return await self._get_map_img(as_base64=as_base64)
 
         @self.get(
-            path="/state",
+            path="/api/v1/state",
             tags=["Official_API"],
             summary="Get State",
             response_model=StateModel,
@@ -797,7 +798,7 @@ class App(FastAPI):
             return await self.get_state()
 
         @self.get(
-            path="/gyroscope",
+            path="/api/v1/gyroscope",
             tags=["Custom_API"],
             summary="Get Gyroscope Data",
             response_model=GyroscopeModel,
@@ -839,7 +840,7 @@ class App(FastAPI):
             return await self._get_gyroscope()
 
         @self.get(
-            path="/compass",
+            path="/api/v1/compass",
             tags=["Custom_API"],
             summary="Get Compass Data",
             response_model=CompassModel,
@@ -879,7 +880,7 @@ class App(FastAPI):
             return await self._get_compass()
 
         @self.get(
-            path="/speed",
+            path="/api/v1/speed",
             tags=["Custom_API"],
             summary="Get Speed Data",
             response_model=float,
@@ -916,7 +917,7 @@ class App(FastAPI):
             return await self._get_speed()
 
         @self.get(
-            path="/altitude",
+            path="/api/v1/altitude",
             tags=["Custom_API"],
             summary="Get Altitude Data",
             response_model=float,
@@ -951,6 +952,46 @@ class App(FastAPI):
             :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
             """
             return await self._get_altitude()
+
+        @self.get(
+            path="/api/v2/altitude",
+            tags=["Custom_API"],
+            summary="Get Altitude Data V2",
+            response_model=AltitudeModel,
+            description="Endpoint to retrieve altitude data from War Thunder with gear status",
+            responses={
+                200: {
+                    "description": "Altitude data retrieved successfully",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "altitude_meters": 1500.0,
+                                "gear_deployed": False
+                            }
+                        }
+                    }
+                },
+                502: {
+                    "description": "Upstream service unreachable",
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "detail": "Upstream service unreachable: <error details>"
+                            }
+                        }
+                    }
+                }
+            }
+        )
+        async def get_altitude_v2():
+            """
+            Récupère les données d'altitude depuis le serveur War Thunder.
+
+            :param: None
+            :return: `AltitudeModel` représentant les données d'altitude.
+            :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+            """
+            return await self._get_altitude_v2()
 
     @staticmethod
     def _status() -> Status:
@@ -1152,3 +1193,18 @@ class App(FastAPI):
         """
         state: StateModel = await self.get_state()
         return state.H_m
+
+    async def _get_altitude_v2(self) -> AltitudeModel:
+        """
+        Récupère les données d'altitude depuis le serveur War Thunder.
+
+        :param: None
+        :return: `AltitudeModel` représentant les données d'altitude.
+        :except: HTTPException(502) si l'upstream est injoignable ou répond mal.
+        """
+        state: StateModel = await self.get_state()
+        gear_deployed = state.gear >= 90
+        return AltitudeModel(
+            altitude_meters=state.H_m,
+            gear_deployed=gear_deployed
+        )

@@ -6,13 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/map_info': { target: 'http://localhost:8000', changeOrigin: true },
-      '/map_objects': { target: 'http://localhost:8000', changeOrigin: true },
-      '/map_img': { target: 'http://localhost:8000', changeOrigin: true },
-      '/gyroscope': { target: 'http://localhost:8000', changeOrigin: true },
-      '/compass': { target: 'http://localhost:8000', changeOrigin: true },
-      '/speed': { target: 'http://localhost:8000', changeOrigin: true },
-      '/altitude': { target: 'http://localhost:8000', changeOrigin: true }
+      '/map_info': { target: 'http://localhost:8000/api/v1', changeOrigin: true },
+      '/map_objects': { target: 'http://localhost:8000/api/v1', changeOrigin: true },
+      '/map_img': { target: 'http://localhost:8000/api/v1', changeOrigin: true },
+      '/gyroscope': { target: 'http://localhost:8000/api/v1', changeOrigin: true },
+      '/compass': { target: 'http://localhost:8000/api/v1', changeOrigin: true },
+      '/speed': { target: 'http://localhost:8000/api/v1', changeOrigin: true },
+      '/altitude': { target: 'http://localhost:8000/api/v1', changeOrigin: true }
     }
   }
 })
