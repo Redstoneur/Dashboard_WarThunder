@@ -9,15 +9,7 @@ export default function Header({ navOpen, onToggleNav, onLinkClick }: HeaderProp
     return (
         <header className="app__header">
             <div className="app__brand">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="app__logo">
-                    <path
-                        d="M12 2 3 7v6c0 5 4 8 9 9 5-1 9-4 9-9V7l-9-5Z"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinejoin="round"
-                    />
-                    <path d="M8 12.5 11 15l5.5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <img src="/logo.svg" width="34" height="34" alt="" aria-hidden="true" className="app__logo" />
                 <div>
                     <h1 className="app__title">WarThunder Dashboard</h1>
                     <p className="app__subtitle">Télémétrie en temps réel</p>
