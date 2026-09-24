@@ -34,7 +34,7 @@ export default function CompassWidget() {
 
     return (
         <div className="widget-card">
-            <svg viewBox="0 0 220 220" role="img" aria-label={`Cap ${heading.toFixed(0)}° ${direction}`}>
+            <svg viewBox="0 0 220 220" className="compass-gauge" role="img" aria-label={`Cap ${heading.toFixed(0)}° ${direction}`}>
                 <circle cx="110" cy="110" r="95" className="compass-rose__ring" />
                 <g transform={`rotate(${-heading} 110 110)`}>
                     {TICKS.map(({ angle, label }) => {

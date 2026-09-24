@@ -19,7 +19,12 @@ export default function GyroscopeWidget() {
 
     return (
         <div className="widget-card">
-            <svg viewBox="0 0 220 220" role="img" aria-label={`Horizon artificiel: tangage ${pitch.toFixed(1)}°, roulis ${roll.toFixed(1)}°`}>
+            <svg
+                viewBox="0 0 220 220"
+                className="horizon-gauge"
+                role="img"
+                aria-label={`Horizon artificiel: tangage ${pitch.toFixed(1)}°, roulis ${roll.toFixed(1)}°`}
+            >
                 <defs>
                     <clipPath id="horizon-clip">
                         <circle cx="110" cy="110" r="92" />

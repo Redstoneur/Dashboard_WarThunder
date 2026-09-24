@@ -3,7 +3,6 @@ import { useState } from "react";
 import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import StatusBanner from "./components/StatusBanner";
-import ViewToggle from "./components/ViewToggle";
 import AltitudeWidget from "./components/widgets/AltitudeWidget";
 import CompassWidget from "./components/widgets/CompassWidget";
 import GyroscopeWidget from "./components/widgets/GyroscopeWidget";
@@ -40,25 +39,17 @@ function App() {
     return (
         <div className="app" lang="fr">
             <UpstreamStatusProvider>
-                <Header />
+                <Header
+                    showMap={showMap}
+                    showWidgets={showWidgets}
+                    onToggleMap={toggleMap}
+                    onToggleWidgets={toggleWidgets}
+                />
 
                 <StatusBanner />
 
                 <main className="app__main" id="main" tabIndex={-1}>
                     <section className="widgets" aria-label="Widgets de télémétrie">
-                        <article id="map" className="widget widget--map" aria-labelledby="map-title">
-                            <h2 id="map-title" className="visually-hidden">Carte</h2>
-                            <div className="view-toggle-bar">
-                                <ViewToggle
-                                    showMap={showMap}
-                                    showWidgets={showWidgets}
-                                    onToggleMap={toggleMap}
-                                    onToggleWidgets={toggleWidgets}
-                                />
-                            </div>
-                            {showMap && <MapWidget />}
-                        </article>
-
                         {showWidgets && (
                             <>
                                 <article id="speed" className="widget widget--speed" aria-labelledby="speed-title">
@@ -81,6 +72,13 @@ function App() {
                                     <GyroscopeWidget />
                                 </article>
                             </>
+                        )}
+
+                        {showMap && (
+                            <article id="map" className="widget widget--map" aria-labelledby="map-title">
+                                <h2 id="map-title" className="visually-hidden">Carte</h2>
+                                <MapWidget />
+                            </article>
                         )}
                     </section>
                 </main>
