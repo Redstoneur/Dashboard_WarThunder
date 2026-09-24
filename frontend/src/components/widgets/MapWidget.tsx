@@ -89,6 +89,8 @@ export default function MapWidget() {
             <div className="map-legend">
                 <span className="legend-item"><span className="legend-dot legend-dot--friend" /> Allié</span>
                 <span className="legend-item"><span className="legend-dot legend-dot--enemy" /> Ennemi</span>
+                <span className="legend-item"><span className="legend-dot legend-dot--player" /> Vous (joueur)</span>
+                <span className="legend-item"><span className="legend-dot legend-dot--teammate" /> Coéquipier</span>
                 {!online && <span className="widget-card__offline">Signal perdu</span>}
             </div>
         </div>

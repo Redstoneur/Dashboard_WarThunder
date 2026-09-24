@@ -450,6 +450,24 @@
     background: #ff5d5d;
 }
 
+.legend-dot--player {
+    background: #ffa733;
+}
+
+.legend-dot--teammate {
+    background: #33dd66;
+    animation: legend-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes legend-blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.25;
+    }
+}
+
 /* ---------- Footer ---------- */
 
 .app__footer {
