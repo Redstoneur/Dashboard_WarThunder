@@ -6,10 +6,10 @@ tactique, à partir de l'API locale exposée par le jeu (`http://<ip-du-jeu>:811
 
 Le projet est composé de deux services indépendants :
 
-| Dossier     | Rôle                                                                 | Stack                          |
-|-------------|-----------------------------------------------------------------------|---------------------------------|
-| [`backend/`](./backend/README.md)  | Relaye/normalise les données du serveur War Thunder vers une API JSON stable | Node.js + TypeScript + Express |
-| [`frontend/`](./frontend/README.md) | Tableau de bord web (jauges SVG, carte, alarmes)                     | React + TypeScript + Vite       |
+| Dossier                             | Rôle                                                                         | Stack                          |
+|-------------------------------------|------------------------------------------------------------------------------|--------------------------------|
+| [`backend/`](./backend/README.md)   | Relaye/normalise les données du serveur War Thunder vers une API JSON stable | Node.js + TypeScript + Express |
+| [`frontend/`](./frontend/README.md) | Tableau de bord web (jauges SVG, carte, alarmes)                             | React + TypeScript + Vite      |
 
 Chaque dossier a son propre `README.md` détaillé (configuration, scripts, tests).
 
