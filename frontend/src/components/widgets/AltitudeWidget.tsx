@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { api } from "../../api/client";
 import { GAUGE_RANGES, POLL_INTERVALS } from "../../config/env";
+import { useUpstreamStatus } from "../../context/useUpstreamStatus";
 import { useAltitudeAlarm } from "../../hooks/useAltitudeAlarm";
 import { usePolling } from "../../hooks/usePolling";
 import { useSmoothedValue } from "../../hooks/useSmoothed";
@@ -11,6 +12,7 @@ const ALARM_STORAGE_KEY = "altitude.alarmEnabled";
 /** Widget d'altitude (m) avec alarme de proximité sol, interrogé via `GET /api/v2/altitude`. */
 export default function AltitudeWidget() {
     const { data, online } = usePolling((signal) => api.altitudeV2(signal), POLL_INTERVALS.altitude);
+    const { upstreamReachable } = useUpstreamStatus();
     const altitude = online ? data?.altitude_meters ?? 0 : 0;
     const gearDeployed = online ? data?.gear_deployed ?? true : true;
     const display = useSmoothedValue(altitude, 0.12);
@@ -34,7 +36,7 @@ export default function AltitudeWidget() {
     useAltitudeAlarm({
         altitude,
         gearDeployed,
-        enabled: alarmEnabled && online,
+        enabled: alarmEnabled && upstreamReachable,
         intermittentStart: GAUGE_RANGES.altitudeAlarmIntermittentStart,
         continuousStart: GAUGE_RANGES.altitudeAlarmContinuousStart
     });
@@ -74,11 +76,11 @@ export default function AltitudeWidget() {
                 type="button"
                 className={`alarm-toggle ${alarmEnabled ? "on" : "off"}`}
                 aria-pressed={alarmEnabled}
-                disabled={!online}
-                title={!online ? "Alarme indisponible : serveur War Thunder injoignable" : undefined}
+                disabled={!upstreamReachable}
+                title={!upstreamReachable ? "Alarme indisponible : serveur War Thunder injoignable" : undefined}
                 onClick={() => setAlarmEnabled((v) => !v)}
             >
-                {online
+                {upstreamReachable
                     ? alarmEnabled
                         ? "Alarme sol : activée"
                         : "Alarme sol : désactivée"

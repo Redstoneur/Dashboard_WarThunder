@@ -1,7 +1,4 @@
-import { api } from "../api/client";
-import { POLL_INTERVALS } from "../config/env";
-import { usePolling } from "../hooks/usePolling";
-import type { StatusResponse } from "../api/types";
+import { useUpstreamStatus } from "../context/useUpstreamStatus";
 
 /**
  * Bannière indiquant si le serveur War Thunder d'origine (la machine sur laquelle le jeu
@@ -9,9 +6,9 @@ import type { StatusResponse } from "../api/types";
  * le jeu est éteint (voir backend: comportement de fallback).
  */
 export default function StatusBanner() {
-    const { data } = usePolling<StatusResponse>((signal) => api.status(signal), POLL_INTERVALS.status);
+    const { status, upstreamReachable } = useUpstreamStatus();
 
-    if (!data || data.upstream.reachable) return null;
+    if (!status || upstreamReachable) return null;
 
     return (
         <div className="status-banner" role="status">
@@ -25,7 +22,7 @@ export default function StatusBanner() {
                 />
             </svg>
             <span>
-                Serveur War Thunder injoignable ({data.upstream.host}:{data.upstream.port}) — lancez le jeu pour
+                Serveur War Thunder injoignable ({status.upstream.host}:{status.upstream.port}) — lancez le jeu pour
                 recevoir la télémétrie en direct. Affichage de données par défaut.
             </span>
         </div>
