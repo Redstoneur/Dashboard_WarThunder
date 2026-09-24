@@ -1,7 +1,9 @@
 import cors from "cors";
 import express, { type Express } from "express";
+import swaggerUi from "swagger-ui-express";
 
 import { config } from "./config/env.js";
+import { buildOpenApiDocument } from "./docs/openapi.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { customRouterV1, customRouterV2 } from "./routes/customRoutes.js";
 import { officialRouter } from "./routes/officialRoutes.js";
@@ -26,9 +28,17 @@ export function createApp(): Express {
         res.json({
             name: "War Thunder Dashboard API",
             version: "1.0.0",
-            docs: "/api/v1/status"
+            docs: "/api/docs",
+            openapi: "/api/openapi.json"
         });
     });
+
+    const openApiDocument = buildOpenApiDocument();
+
+    app.get("/api/openapi.json", (_req, res) => {
+        res.json(openApiDocument);
+    });
+    app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument, { customSiteTitle: "War Thunder Dashboard API Docs" }));
 
     app.use("/api/v1", statusRouter);
     app.use("/api/v1", officialRouter);

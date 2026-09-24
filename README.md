@@ -25,12 +25,26 @@ docker compose up -d --build
 
 - Frontend : http://localhost:8080
 - Backend (API) : http://localhost:8000/api/v1/status
+- Documentation API (Swagger) : http://localhost:8000/api/docs
 
 Voir [Configuration](#configuration) ci-dessous pour la liste complète des variables.
 
 > ℹ️ Si le jeu n'est pas lancé (serveur War Thunder injoignable), l'API et le dashboard
 > restent fonctionnels et affichent un état "hors-ligne" avec des données de base, au lieu
 > de planter (voir [backend/README.md](./backend/README.md#comportement-hors-ligne-fallback)).
+
+### Où tourne War Thunder par rapport à Docker ?
+
+`WAR_THUNDER_IP`/`WAR_THUNDER_PORT` (dans `.env`) désignent simplement la machine qui fait
+tourner le jeu — le backend l'appelle en HTTP classique, aucun changement de code requis :
+
+| Cas de figure                                   | Valeur de `WAR_THUNDER_IP`                                   |
+|--------------------------------------------------|----------------------------------------------------------------|
+| Le jeu tourne sur **la même machine** que Docker | `host.docker.internal` (déjà résolu vers l'hôte, cf. `docker-compose.yml`) |
+| Le jeu tourne sur **une autre machine du LAN**    | IP locale de cette machine, ex. `192.168.1.42`                 |
+| Le jeu tourne **hors du réseau local**            | Possible techniquement (IP publique/VPN), **déconseillé** : l'API du jeu n'est ni authentifiée ni chiffrée — ne l'exposez pas sur Internet sans protection (VPN/pare-feu). |
+
+Détails complets dans [backend/README.md](./backend/README.md#connexion-au-serveur-war-thunder-local-ou-réseau-local).
 
 ## Démarrage rapide (sans Docker)
 
