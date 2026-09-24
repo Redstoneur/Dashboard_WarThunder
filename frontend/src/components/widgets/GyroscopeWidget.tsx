@@ -4,7 +4,10 @@ import { usePolling } from "../../hooks/usePolling";
 import { useSmoothedAngle, useSmoothedValue } from "../../hooks/useSmoothed";
 import type { GyroscopeData } from "../../api/types";
 
-const PITCH_TO_PX = 1.6;
+// Amplitude (px) du déplacement de la ligne d'horizon pour une inclinaison proche de 90°.
+// Volontairement > au rayon du cadran (92) pour garantir un "plein ciel"/"pleine terre" dès
+// qu'on approche la verticale, avant que ça ne revienne au centre (vol dos, cf. sinus ci-dessous).
+const PITCH_AMPLITUDE_PX = 100;
 
 /** Widget d'horizon artificiel (pitch/roll/yaw/turn), interrogé via `GET /api/v1/gyroscope`. */
 export default function GyroscopeWidget() {
@@ -15,7 +18,13 @@ export default function GyroscopeWidget() {
     const yaw = useSmoothedAngle(online ? data?.yaw ?? 0 : 0, 0.08);
     const turn = useSmoothedValue(online ? data?.turn ?? 0 : 0, 0.08);
 
-    const pitchPx = Math.max(-60, Math.min(60, pitch * PITCH_TO_PX));
+    // Projection sinusoïdale (et non linéaire) de la ligne d'horizon : à 0° elle est au centre du
+    // cadran (moitié ciel, moitié terre) ; elle descend/monte progressivement jusqu'à un maximum
+    // vers ±90° (piqué/ressource à la verticale) puis revient au centre vers ±180° (vol dos), où
+    // le ciel et la terre sont inversés puisqu'on est alors sur le dos (cos(tangage) < 0).
+    const pitchRad = (pitch * Math.PI) / 180;
+    const horizonOffsetPx = Math.sin(pitchRad) * PITCH_AMPLITUDE_PX;
+    const inverted = Math.cos(pitchRad) < 0;
 
     return (
         <div className="widget-card">
@@ -32,15 +41,18 @@ export default function GyroscopeWidget() {
                 </defs>
 
                 <g clipPath="url(#horizon-clip)">
-                    <g transform={`rotate(${roll} 110 110) translate(0 ${pitchPx})`}>
-                        <rect x="-40" y="-260" width="300" height="260" className="horizon__sky" />
-                        <rect x="-40" y="0" width="300" height="260" className="horizon__ground" />
-                        <line x1="-40" y1="0" x2="260" y2="0" className="horizon__line" />
+                    {/* Le repère local (0,0) est recentré sur le centre du cadran (110,110), décalé
+                        verticalement selon le tangage, puis l'ensemble tourne autour de ce même
+                        centre selon le roulis (positif = à droite, comme demandé). */}
+                    <g transform={`rotate(${roll} 110 110) translate(110 ${110 + horizonOffsetPx})`}>
+                        <rect x="-150" y="-300" width="300" height="300" className={inverted ? "horizon__ground" : "horizon__sky"} />
+                        <rect x="-150" y="0" width="300" height="300" className={inverted ? "horizon__sky" : "horizon__ground"} />
+                        <line x1="-120" y1="0" x2="120" y2="0" className="horizon__line" />
                         {[-30, -20, -10, 10, 20, 30].map((deg) => (
                             <line
                                 key={deg}
-                                x1={90}
-                                x2={130}
+                                x1={-20}
+                                x2={20}
                                 y1={-deg * 2}
                                 y2={-deg * 2}
                                 className="horizon__pitch-tick"
@@ -50,7 +62,12 @@ export default function GyroscopeWidget() {
                 </g>
 
                 <circle cx="110" cy="110" r="92" className="horizon__bezel" />
-                <polygon points="110,22 100,40 120,40" className="horizon__roll-marker" />
+
+                {/* Indicateur orange de roulis : tourne avec l'horizon (droite = positif). */}
+                <g transform={`rotate(${roll} 110 110)`}>
+                    <polygon points="110,22 100,40 120,40" className="horizon__roll-marker" />
+                </g>
+
                 <g className="horizon__fixed-aircraft">
                     <line x1="70" y1="110" x2="95" y2="110" />
                     <line x1="125" y1="110" x2="150" y2="110" />
