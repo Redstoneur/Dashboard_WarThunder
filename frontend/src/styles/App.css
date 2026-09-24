@@ -43,36 +43,6 @@
     color: var(--color-text-muted);
 }
 
-.nav-toggle {
-    display: none;
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: 0.5rem;
-    color: var(--color-text);
-    padding: 0.4rem 0.6rem;
-    cursor: pointer;
-}
-
-.app__nav .nav__list {
-    list-style: none;
-    display: flex;
-    gap: 1.2rem;
-    margin: 0;
-    padding: 0;
-}
-
-.nav__link {
-    text-decoration: none;
-    color: var(--color-text-muted);
-    font-size: 0.9rem;
-    transition: color 0.15s ease;
-}
-
-.nav__link:hover,
-.nav__link:focus-visible {
-    color: var(--color-accent);
-}
-
 /* ---------- Status banner ---------- */
 
 .status-banner {
@@ -95,7 +65,7 @@
 
 .widgets {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.25rem;
     max-width: 1400px;
     margin: 0 auto;
@@ -103,6 +73,45 @@
 
 .widget--map {
     grid-column: 1 / -1;
+}
+
+.view-toggle-bar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.9rem;
+}
+
+.view-toggle {
+    display: inline-flex;
+    gap: 0.35rem;
+    padding: 0.3rem;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+}
+
+.view-toggle__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.view-toggle__button:hover {
+    color: var(--color-text);
+}
+
+.view-toggle__button.is-active {
+    background: var(--color-accent);
+    color: #0b1220;
+    font-weight: 600;
 }
 
 .widget__title {
@@ -430,35 +439,3 @@
 
 /* ---------- Responsive ---------- */
 
-@media (max-width: 768px) {
-    .nav-toggle {
-        display: inline-flex;
-    }
-
-    .app__nav {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--color-surface);
-        border-bottom: 1px solid var(--color-border);
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.2s ease;
-    }
-
-    .app__nav.is-open {
-        max-height: 260px;
-    }
-
-    .app__nav .nav__list {
-        flex-direction: column;
-        gap: 0;
-        padding: 0.5rem 1.5rem;
-    }
-
-    .nav__link {
-        display: block;
-        padding: 0.6rem 0;
-    }
-}
