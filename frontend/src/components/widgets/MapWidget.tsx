@@ -181,6 +181,7 @@ export default function MapWidget() {
                 <span className="legend-item"><span className="legend-dot legend-dot--enemy" /> Ennemi</span>
                 <span className="legend-item"><span className="legend-dot legend-dot--player" /> Vous (joueur)</span>
                 <span className="legend-item"><span className="legend-dot legend-dot--teammate" /> Coéquipier</span>
+                <span className="legend-item"><span className="legend-square" /> Zone à capturer</span>
                 {!online && <span className="widget-card__offline">Signal perdu</span>}
             </div>
         </div>

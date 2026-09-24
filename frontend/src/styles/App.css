@@ -455,18 +455,17 @@
 }
 
 .legend-dot--teammate {
-    background: #33dd66;
-    animation: legend-blink 1.2s ease-in-out infinite;
+    background: #7be08a;
 }
 
-@keyframes legend-blink {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.25;
-    }
+.legend-square {
+    width: 0.65rem;
+    height: 0.65rem;
+    display: inline-block;
+    border: 1.5px solid #f4f6fb;
+    box-sizing: border-box;
 }
+
 
 /* ---------- Footer ---------- */
 
