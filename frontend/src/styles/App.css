@@ -458,12 +458,9 @@
     background: #7be08a;
 }
 
-.legend-square {
-    width: 0.65rem;
-    height: 0.65rem;
-    display: inline-block;
-    border: 1.5px solid #f4f6fb;
-    box-sizing: border-box;
+.legend-dot--capture {
+    background: #f4f6fb;
+    border: 1px solid var(--color-border);
 }
 
 
