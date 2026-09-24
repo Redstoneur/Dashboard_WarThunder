@@ -49,8 +49,11 @@ export default function GaugeArc({ value, min, max, label, unit, accentColor, ti
                 const y1 = center + (radius + 10) * Math.sin(rad);
                 const x2 = center + (radius + 2) * Math.cos(rad);
                 const y2 = center + (radius + 2) * Math.sin(rad);
-                const lx = center + (radius + 22) * Math.cos(rad);
-                const ly = center + (radius + 22) * Math.sin(rad);
+                // Décalage réduit (12 au lieu de 22) : au-delà, les libellés proches des angles
+                // extrêmes de l'arc (haut-gauche/haut-droit) sortaient du viewBox 220x220 et
+                // étaient rognés par le SVG (chiffres partiellement masqués sur les côtés).
+                const lx = center + (radius + 12) * Math.cos(rad);
+                const ly = center + (radius + 12) * Math.sin(rad);
                 return (
                     <g key={angle}>
                         <line x1={x1} y1={y1} x2={x2} y2={y2} className="gauge-arc__tick" />

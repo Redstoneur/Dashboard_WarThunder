@@ -357,6 +357,23 @@
     color: var(--color-text);
 }
 
+/* Quand le dessin de l'horizon est masqué, les valeurs prennent toute la place disponible
+   dans le widget : une seule colonne, police agrandie, pour rester lisibles sans repère visuel. */
+.gyro-readouts--expanded {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    font-size: 1.15rem;
+    padding: 0.4rem 0;
+}
+
+.gyro-readouts--expanded .gyro-readouts__row {
+    font-size: 1.15rem;
+}
+
+.gyro-readouts--expanded .gyro-readouts__row strong {
+    font-size: 1.35rem;
+}
+
 /* ---------- Map ---------- */
 
 .widget-card--map {
