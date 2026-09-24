@@ -7,7 +7,9 @@ import { useAltitudeAlarm } from "../../hooks/useAltitudeAlarm";
 import { usePolling } from "../../hooks/usePolling";
 import { useSmoothedValue } from "../../hooks/useSmoothed";
 
-const ALARM_STORAGE_KEY = "altitude.alarmEnabled";
+// v2 : renommée pour repartir sur un état propre (activée par défaut), une ancienne valeur
+// "false" stockée localement lors de précédents tests restait sinon collée indéfiniment.
+const ALARM_STORAGE_KEY = "altitude.alarmEnabled.v2";
 
 /** Widget d'altitude (m) avec alarme de proximité sol, interrogé via `GET /api/v2/altitude`. */
 export default function AltitudeWidget() {

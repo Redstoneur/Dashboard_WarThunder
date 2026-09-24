@@ -11,7 +11,9 @@ import type { GyroscopeData } from "../../api/types";
 // qu'on approche la verticale, avant que ça ne revienne au centre (vol dos, cf. sinus ci-dessous).
 const PITCH_AMPLITUDE_PX = 100;
 
-const VISUAL_STORAGE_KEY = "gyroscope.visualEnabled";
+// v2 : renommée pour repartir sur un état propre (activé par défaut), une ancienne valeur
+// "false" stockée localement lors de précédents tests restait sinon collée indéfiniment.
+const VISUAL_STORAGE_KEY = "gyroscope.visualEnabled.v2";
 
 /** Widget d'horizon artificiel (pitch/roll/yaw/turn), interrogé via `GET /api/v1/gyroscope`. */
 export default function GyroscopeWidget() {
