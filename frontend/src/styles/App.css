@@ -1,0 +1,456 @@
+.app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ---------- Header / Navigation ---------- */
+
+.app__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 1.5rem;
+    background: linear-gradient(180deg, var(--color-surface) 0%, rgba(18, 27, 46, 0.6) 100%);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(6px);
+}
+
+.app__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.app__logo {
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.app__title {
+    margin: 0;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+}
+
+.app__subtitle {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.nav-toggle {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: var(--color-text);
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+}
+
+.app__nav .nav__list {
+    list-style: none;
+    display: flex;
+    gap: 1.2rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav__link {
+    text-decoration: none;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    transition: color 0.15s ease;
+}
+
+.nav__link:hover,
+.nav__link:focus-visible {
+    color: var(--color-accent);
+}
+
+/* ---------- Status banner ---------- */
+
+.status-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1.5rem;
+    background: rgba(255, 184, 77, 0.12);
+    color: var(--color-warning);
+    border-bottom: 1px solid rgba(255, 184, 77, 0.35);
+    font-size: 0.85rem;
+}
+
+/* ---------- Main / widgets grid ---------- */
+
+.app__main {
+    flex: 1;
+    padding: 1.5rem;
+}
+
+.widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.widget--map {
+    grid-column: 1 / -1;
+}
+
+.widget__title {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.widget {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 1.1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.widget-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.widget-card__offline {
+    margin: 0;
+    color: var(--color-danger);
+    font-size: 0.78rem;
+}
+
+/* ---------- Gauges (speed / altitude) ---------- */
+
+.gauge-arc,
+.altitude-gauge svg {
+    width: 100%;
+    max-width: 220px;
+}
+
+.gauge-arc__track {
+    stroke: var(--color-surface-alt);
+    stroke-width: 10;
+}
+
+.gauge-arc__progress {
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke 0.2s ease;
+}
+
+.gauge-arc__tick {
+    stroke: var(--color-border);
+    stroke-width: 2;
+}
+
+.gauge-arc__tick-label {
+    font-size: 8px;
+    fill: var(--color-text-muted);
+}
+
+.gauge-arc__value {
+    font-size: 30px;
+    font-weight: 700;
+    fill: var(--color-text);
+}
+
+.gauge-arc__unit {
+    font-size: 12px;
+    fill: var(--color-text-muted);
+}
+
+.gauge-arc__label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    fill: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.altitude-gauge {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.altitude-gauge__track {
+    fill: none;
+    stroke: var(--color-surface-alt);
+    stroke-width: 10;
+}
+
+.altitude-gauge__progress {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 110px 110px;
+    transition: stroke-dashoffset 0.2s ease;
+}
+
+.gear-indicator {
+    margin-top: -0.4rem;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+}
+
+.gear-indicator--down {
+    color: #7be08a;
+    border-color: #2e6b3d;
+}
+
+.gear-indicator--up {
+    color: var(--color-warning);
+    border-color: #6b4e1f;
+}
+
+.alarm-toggle {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.alarm-toggle.on {
+    border-color: #2e6b3d;
+    color: #7be08a;
+}
+
+.alarm-toggle.off {
+    border-color: #6b2e2e;
+    color: var(--color-danger);
+}
+
+/* ---------- Compass ---------- */
+
+.compass-rose__ring {
+    fill: var(--color-surface-alt);
+    stroke: var(--color-border);
+    stroke-width: 2;
+}
+
+.compass-rose__tick,
+.compass-rose__tick-major {
+    stroke: var(--color-text-muted);
+}
+
+.compass-rose__tick-major {
+    stroke-width: 2;
+}
+
+.compass-rose__tick {
+    stroke-width: 1;
+}
+
+.compass-rose__label {
+    font-size: 8px;
+    fill: var(--color-text-muted);
+}
+
+.compass-rose__label-major {
+    font-size: 11px;
+    font-weight: 700;
+    fill: var(--color-text);
+}
+
+.compass-rose__needle {
+    fill: var(--color-danger);
+}
+
+/* ---------- Artificial horizon (gyroscope) ---------- */
+
+.horizon__sky {
+    fill: #2a5da8;
+}
+
+.horizon__ground {
+    fill: #6b4423;
+}
+
+.horizon__line {
+    stroke: var(--color-text);
+    stroke-width: 1.5;
+}
+
+.horizon__pitch-tick {
+    stroke: var(--color-text);
+    stroke-width: 1;
+}
+
+.horizon__bezel {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 4;
+}
+
+.horizon__roll-marker {
+    fill: var(--color-warning);
+}
+
+.horizon__fixed-aircraft line,
+.horizon__fixed-aircraft circle {
+    stroke: #ffcc00;
+    stroke-width: 3;
+    fill: #ffcc00;
+}
+
+.gyro-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.3rem 1rem;
+    width: 100%;
+    font-size: 0.8rem;
+}
+
+.gyro-readouts__row {
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-text-muted);
+}
+
+.gyro-readouts__row strong {
+    color: var(--color-text);
+}
+
+/* ---------- Map ---------- */
+
+.widget-card--map {
+    align-items: stretch;
+}
+
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.map-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #0d1526;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.map-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.map-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.map-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.map-legend {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-dot--friend {
+    background: #4da3ff;
+}
+
+.legend-dot--enemy {
+    background: #ff5d5d;
+}
+
+/* ---------- Footer ---------- */
+
+.app__footer {
+    text-align: center;
+    padding: 1rem;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+    .nav-toggle {
+        display: inline-flex;
+    }
+
+    .app__nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease;
+    }
+
+    .app__nav.is-open {
+        max-height: 260px;
+    }
+
+    .app__nav .nav__list {
+        flex-direction: column;
+        gap: 0;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .nav__link {
+        display: block;
+        padding: 0.6rem 0;
+    }
+}

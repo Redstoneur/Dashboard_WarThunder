@@ -1,73 +1,86 @@
-# React + TypeScript + Vite
+# War Thunder Dashboard — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Tableau de bord web (React + TypeScript + Vite) affichant la télémétrie War Thunder en
+temps réel : vitesse, altitude (avec alarme de proximité sol), boussole, horizon
+artificiel (gyroscope) et carte tactique. Toutes les jauges sont dessinées en **SVG**
+(pas d'images bitmap), pour rester nettes à toute résolution et faciles à styliser.
 
-Currently, two official plugins are available:
+## Sommaire
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Scripts](#scripts)
+- [Structure du projet](#structure-du-projet)
+- [Fonctionnement hors-ligne](#fonctionnement-hors-ligne)
+- [Docker](#docker)
 
-## React Compiler
+## Prérequis
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js >= 20
+- Le backend (`../backend`) démarré, ou accessible via `VITE_API_BASE_URL`.
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd frontend
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Configuration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+| Variable                              | Défaut                   | Description                                                        |
+|----------------------------------------|---------------------------|----------------------------------------------------------------------|
+| `VITE_API_BASE_URL`                    | *(vide)*                  | URL absolue du backend. Vide = requêtes relatives (proxy/Nginx)      |
+| `VITE_DEV_API_PROXY_TARGET`             | `http://localhost:8000`   | Cible du proxy `/api` en développement (`npm run dev`)               |
+| `VITE_DEV_PORT`                        | `5173`                    | Port du serveur de développement Vite                                |
+| `VITE_POLL_STATUS_MS`                  | `5000`                    | Intervalle de polling du statut API                                  |
+| `VITE_POLL_SPEED_MS`                   | `200`                     | Intervalle de polling de la vitesse                                  |
+| `VITE_POLL_ALTITUDE_MS`                | `500`                     | Intervalle de polling de l'altitude                                  |
+| `VITE_POLL_COMPASS_MS`                 | `100`                     | Intervalle de polling de la boussole                                 |
+| `VITE_POLL_GYROSCOPE_MS`               | `100`                     | Intervalle de polling du gyroscope                                   |
+| `VITE_POLL_MAP_MS`                     | `400`                     | Intervalle de polling des objets de la carte                         |
+| `VITE_SPEED_MIN` / `VITE_SPEED_MAX`     | `0` / `1000`              | Plage (km/h) affichée par la jauge de vitesse                        |
+| `VITE_ALTITUDE_MIN` / `VITE_ALTITUDE_MAX` | `0` / `3000`            | Plage (m) affichée par la jauge d'altitude                           |
+| `VITE_ALTITUDE_ALARM_INTERMITTENT_M`   | `100`                     | Altitude (m, train rentré) sous laquelle l'alarme devient intermittente |
+| `VITE_ALTITUDE_ALARM_CONTINUOUS_M`     | `50`                      | Altitude (m, train rentré) sous laquelle l'alarme devient continue    |
+
+## Scripts
+
+```bash
+npm run dev       # serveur de développement (http://localhost:5173)
+npm run build     # build de production (tsc + vite build) -> dist/
+npm run preview   # sert le build de production localement
+npm run lint      # ESLint
+```
+
+## Structure du projet
+
+```
+src/
+  api/          # client HTTP (fetch) + types partagés avec le backend
+  components/
+    layout/     # Header, Footer
+    widgets/    # SpeedWidget, AltitudeWidget, CompassWidget, GyroscopeWidget, MapWidget
+    StatusBanner.tsx
+  config/       # lecture des variables VITE_*
+  hooks/        # usePolling, useSmoothedValue/Angle, useAltitudeAlarm
+  styles/       # CSS (variables de thème + mise en page)
+```
+
+## Fonctionnement hors-ligne
+
+Le composant `StatusBanner` interroge `GET /api/v1/status` : si le serveur War Thunder
+d'origine (la machine sur laquelle le jeu tourne) est injoignable, une bannière d'alerte
+s'affiche et chaque widget affiche "Signal perdu" tout en conservant des valeurs par
+défaut cohérentes (grâce au fallback du backend), plutôt que de planter l'interface.
+
+## Docker
+
+Voir le [`Dockerfile`](./Dockerfile) (build Vite + service Nginx avec reverse-proxy `/api`
+configurable via `BACKEND_HOST`/`BACKEND_PORT`) et le
+[`docker-compose.yml`](../docker-compose.yml) à la racine du projet.
