@@ -243,6 +243,14 @@
     color: var(--color-danger);
 }
 
+.alarm-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+    background: var(--color-surface-alt);
+}
+
 /* ---------- Compass ---------- */
 
 .compass-rose__ring {

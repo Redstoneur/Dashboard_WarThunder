@@ -74,9 +74,15 @@ export default function AltitudeWidget() {
                 type="button"
                 className={`alarm-toggle ${alarmEnabled ? "on" : "off"}`}
                 aria-pressed={alarmEnabled}
+                disabled={!online}
+                title={!online ? "Alarme indisponible : serveur War Thunder injoignable" : undefined}
                 onClick={() => setAlarmEnabled((v) => !v)}
             >
-                {alarmEnabled ? "Alarme sol : activée" : "Alarme sol : désactivée"}
+                {online
+                    ? alarmEnabled
+                        ? "Alarme sol : activée"
+                        : "Alarme sol : désactivée"
+                    : "Alarme sol : indisponible (hors-ligne)"}
             </button>
             {!online && <p className="widget-card__offline">Signal perdu</p>}
         </div>
