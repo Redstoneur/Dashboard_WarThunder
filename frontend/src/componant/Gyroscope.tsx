@@ -23,7 +23,45 @@ function shortestAngleDiff(a: number, b: number) {
   return ((b - a + 180) % 360) - 180
 }
 
-export function Gyroscope() {
+// Normalise un payload brut provenant de l'API vers l'interface GyroData.
+// - accepte plusieurs alias communs (bank, tangage, lacet, etc.)
+// - renvoie des nombres sûrs
+function normalizeIncoming(raw: unknown): GyroData {
+  if (!raw || typeof raw !== 'object') {
+    return { pitch: 0, roll: 0, yaw: 0, turn: 0 }
+  }
+
+  const obj = raw as Record<string, unknown>
+
+  // helper pour extraire un champ potentiellement nommé différemment
+  const pickNumber = (...keys: string[]) => {
+    for (const k of keys) {
+      if (k in obj) {
+        const val = obj[k]
+        if (typeof val === 'number' && Number.isFinite(val)) return val
+        if (typeof val === 'string') {
+          const parsed = Number(val)
+          if (Number.isFinite(parsed)) return parsed
+        }
+      }
+    }
+    return 0
+  }
+
+  // aliases fréquents :
+  // - pitch: 'pitch', 'tangage', 'elevation'
+  // - roll: 'roll', 'bank', 'roulis', 'inclination'
+  // - yaw: 'yaw', 'lacet', 'heading'
+  // - turn: 'turn', 'turn_rate', 'rate'
+  const pitch = pickNumber('pitch', 'tangage', 'elevation')
+  const roll = pickNumber('roll', 'bank', 'roulis', 'inclination')
+  const yaw = pickNumber('yaw', 'lacet', 'heading')
+  const turn = pickNumber('turn', 'turn_rate', 'rate')
+
+  return { pitch, roll, yaw, turn }
+}
+
+export function Gyroscope({ swapAxes = true }: { swapAxes?: boolean } = {}) {
   const targetRef = useRef<GyroData>({ pitch: 0, roll: 0, yaw: 0, turn: 0 })
   const displayRef = useRef<GyroData>({ pitch: 0, roll: 0, yaw: 0, turn: 0 })
   const [display, setDisplay] = useState<GyroData>({ pitch: 0, roll: 0, yaw: 0, turn: 0 })
@@ -35,17 +73,18 @@ export function Gyroscope() {
       try {
         const res = await fetch(API_URL)
         if (!res.ok) return
-        const data = (await res.json()) as GyroData
+        const raw = await res.json()
         // keep angles in degrees; normalize yaw to [0,360)
         if (!mounted) return
-        const rawYaw = Number(data.yaw)
+
+        const parsed = normalizeIncoming(raw)
+        const rawYaw = Number(parsed.yaw)
         const yaw = Number.isFinite(rawYaw) ? ((rawYaw % 360) + 360) % 360 : 0
-        targetRef.current = {
-          pitch: Number(data.pitch) || 0,
-          roll: Number(data.roll) || 0,
-          yaw,
-          turn: Number(data.turn) || 0,
-        }
+
+        // Use swapAxes flag instead of directly swapping in place to keep mapping explicit
+        targetRef.current = swapAxes
+          ? { pitch: parsed.roll, roll: parsed.pitch, yaw, turn: parsed.turn }
+          : { pitch: parsed.pitch, roll: parsed.roll, yaw, turn: parsed.turn }
       } catch {
         // ignore errors silently for now; we keep previous target
       }
@@ -64,7 +103,7 @@ export function Gyroscope() {
       mounted = false
       stopped = true
     }
-  }, [])
+  }, [swapAxes])
 
   // Animation loop pour interpolation fluide
   useEffect(() => {

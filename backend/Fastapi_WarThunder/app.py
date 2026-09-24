@@ -1161,7 +1161,7 @@ class App(FastAPI):
         else:
             turn = indicators.turn
         return GyroscopeModel(
-            pitch=indicators.aviahorizon_roll,
+            pitch=(indicators.aviahorizon_roll/90)*180 if indicators.aviahorizon_roll is not None else 0.0,
             roll=indicators.aviahorizon_pitch,
             yaw=indicators.bank,
             turn=turn
