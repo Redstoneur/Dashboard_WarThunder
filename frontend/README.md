@@ -79,6 +79,17 @@ d'origine (la machine sur laquelle le jeu tourne) est injoignable, une bannière
 s'affiche et chaque widget affiche "Signal perdu" tout en conservant des valeurs par
 défaut cohérentes (grâce au fallback du backend), plutôt que de planter l'interface.
 
+## Affichage adaptatif
+
+Sur ordinateur, les quatre instruments se répartissent par deux de chaque côté
+de la carte ; les cadrans et leurs textes s'adaptent à la place disponible, et
+le contenu ne fait pas défiler la page. La carte conserve les proportions de
+son image, y compris en plein écran quand les instruments sont masqués.
+Les filtres de types s'ouvrent au clic sans réduire la carte par défaut.
+Si seule la télémétrie est visible, les quatre instruments occupent une ligne.
+Sur téléphone (y compris en paysage), les instruments se placent au-dessus de
+la carte et le défilement de la page est autorisé.
+
 ## Carte tactique
 
 La carte s'ouvre en mode **Suivi de champ de bataille** : son cadrage s'adapte
@@ -99,6 +110,10 @@ reste distincte des cases à cocher de la
 légende des types, qui permettent de masquer séparément les symboles de chaque
 famille. La case « Tout afficher » masque ou réaffiche tous les types en un clic
 et indique un état intermédiaire lorsque seuls certains types sont visibles.
+« Épingler les filtres » les maintient visibles sous la carte sans la recouvrir ;
+ce choix est conservé après rechargement. « Détacher les filtres » rétablit le
+panneau replié par défaut. Quand la fenêtre est basse, la liste épinglée
+défile indépendamment pour préserver la place de la carte.
 Le résumé de cette légende indique le nombre d'objets positionnés transmis par
 le jeu, le nombre associé aux types activés et le détail par type (sur toute la
 carte, pas uniquement dans la zone actuellement zoomée).

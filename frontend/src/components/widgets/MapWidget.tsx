@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 
 import { api } from "../../api/client";
 import { POLL_INTERVALS } from "../../config/env";
@@ -9,6 +10,7 @@ import { actionView, categoryOf, clampView, DEFAULT_VISIBILITY, directionHeading
 import type { MapMode, MapView, MapVisibility } from "./mapView";
 
 const MAP_SYMBOL_SIZE = 4 / 3;
+const FILTERS_PINNED_KEY = "map.filtersPinned";
 
 /** Rectangle (en pixels, relatif au conteneur) réellement occupé par l'image affichée. */
 interface ImageRect {
@@ -44,6 +46,7 @@ function computeContainRect(containerW: number, containerH: number, naturalW: nu
 /** Widget de carte tactique: image + objets (avions, véhicules...) en overlay. */
 export default function MapWidget() {
     const [imgUrl, setImgUrl] = useState<string | null>(null);
+    const [imageAspectRatio, setImageAspectRatio] = useState(1);
     const { data: info } = usePolling<MapInfo>((signal) => api.mapInfo(signal), POLL_INTERVALS.status);
     const { data: objects, online } = usePolling<MapObject[]>((signal) => api.mapObjects(signal), POLL_INTERVALS.map);
     const { data: compass, online: compassOnline } = usePolling<CompassData>(
@@ -54,6 +57,14 @@ export default function MapWidget() {
     const [mode, setMode] = useState<MapMode>("battlefield");
     const [manualView, setManualView] = useState<MapView>(FULL_VIEW);
     const [visibility, setVisibility] = useState<MapVisibility>(DEFAULT_VISIBILITY);
+    const [filtersPinned, setFiltersPinned] = useState(() => {
+        try {
+            return localStorage.getItem(FILTERS_PINNED_KEY) === "true";
+        } catch {
+            return false;
+        }
+    });
+    const filtersRef = useRef<HTMLDetailsElement>(null);
     const allTypesChecked = MAP_CATEGORIES.every(({ id }) => visibility[id]);
     const someTypesChecked = MAP_CATEGORIES.some(({ id }) => visibility[id]);
     const allTypesRef = useRef<HTMLInputElement>(null);
@@ -77,7 +88,16 @@ export default function MapWidget() {
         if (allTypesRef.current) {
             allTypesRef.current.indeterminate = someTypesChecked && !allTypesChecked;
         }
-    }, [allTypesChecked, someTypesChecked]);
+    }, [allTypesChecked, someTypesChecked, filtersPinned]);
+
+    useEffect(() => {
+        if (filtersPinned && filtersRef.current) filtersRef.current.open = true;
+        try {
+            localStorage.setItem(FILTERS_PINNED_KEY, String(filtersPinned));
+        } catch {
+            // L'affichage fonctionne aussi quand le stockage local est indisponible.
+        }
+    }, [filtersPinned]);
 
     useEffect(() => {
         let mounted = true;
@@ -201,6 +221,7 @@ export default function MapWidget() {
             </div>
             {mode === "player" && !currentPlayerView &&
                 <p className="map-follow-warning" role="status">Position du joueur indisponible : carte entière affichée.</p>}
+            <div className="map-viewport" style={{ "--map-aspect": imageAspectRatio } as CSSProperties}>
             <div className="map-container" ref={containerRef}
                 onPointerDown={(event) => {
                     if (event.button !== 0 || !imageRect) return;
@@ -241,6 +262,7 @@ export default function MapWidget() {
                             const img = e.currentTarget;
                             const container = containerRef.current;
                             if (!container) return;
+                            setImageAspectRatio(img.naturalWidth / img.naturalHeight);
                             setImageRect(
                                 computeContainRect(container.clientWidth, container.clientHeight, img.naturalWidth, img.naturalHeight)
                             );
@@ -317,33 +339,55 @@ export default function MapWidget() {
                 )}
                 </div>
             </div>
-            <fieldset className="map-type-legend">
-                <legend>Afficher les types d'éléments</legend>
-                <p className="map-type-legend__summary">
-                    Éléments présents : <strong>{positionedObjects.length}</strong> · types activés : {shownCount} éléments
-                </p>
-                <label className="map-type-legend__item map-type-legend__all">
-                    <input
-                        ref={allTypesRef}
-                        type="checkbox"
-                        checked={allTypesChecked}
-                        onChange={() => setVisibility(() => {
-                            const next = { ...DEFAULT_VISIBILITY };
-                            for (const { id } of MAP_CATEGORIES) next[id] = !allTypesChecked;
-                            return next;
-                        })}
-                    />
-                    Tout afficher
-                </label>
-                {categoryCounts.map(({ id, label, count }) => (
-                    <label key={id} className="map-type-legend__item">
-                        <input type="checkbox" checked={visibility[id]}
-                            onChange={() => setVisibility((current) => ({ ...current, [id]: !current[id] }))} />
-                        <MapSymbol category={id} className="map-type-legend__icon" />
-                        {label} <span className="map-type-legend__count">{count}</span>
+            </div>
+            <div className="map-filter-controls">
+            <details
+                ref={filtersRef}
+                className={`map-type-filters ${filtersPinned ? "map-type-filters--pinned" : ""}`}
+                onToggle={(event) => {
+                    if (!event.currentTarget.open && filtersPinned) setFiltersPinned(false);
+                }}
+            >
+                <summary>
+                    Afficher les types d'éléments · {positionedObjects.length} présents · {shownCount} activés
+                </summary>
+                <fieldset className="map-type-legend">
+                    <legend className="visually-hidden">Types d'éléments sur la carte</legend>
+                    <label className="map-type-legend__item map-type-legend__all">
+                        <input
+                            ref={allTypesRef}
+                            type="checkbox"
+                            checked={allTypesChecked}
+                            onChange={() => setVisibility(() => {
+                                const next = { ...DEFAULT_VISIBILITY };
+                                for (const { id } of MAP_CATEGORIES) next[id] = !allTypesChecked;
+                                return next;
+                            })}
+                        />
+                        Tout afficher
                     </label>
-                ))}
-            </fieldset>
+                    {categoryCounts.map(({ id, label, count }) => (
+                        <label key={id} className="map-type-legend__item">
+                            <input type="checkbox" checked={visibility[id]}
+                                onChange={() => setVisibility((current) => ({ ...current, [id]: !current[id] }))} />
+                            <MapSymbol category={id} className="map-type-legend__icon" />
+                            {label} <span className="map-type-legend__count">{count}</span>
+                        </label>
+                    ))}
+                </fieldset>
+            </details>
+            <button
+                type="button"
+                className="map-filter-pin"
+                aria-pressed={filtersPinned}
+                onClick={() => {
+                    if (filtersPinned && filtersRef.current) filtersRef.current.open = false;
+                    setFiltersPinned(!filtersPinned);
+                }}
+            >
+                {filtersPinned ? "Détacher les filtres" : "Épingler les filtres"}
+            </button>
+            </div>
         </div>
     );
 }

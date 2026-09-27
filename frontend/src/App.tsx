@@ -49,7 +49,10 @@ function App() {
                 <StatusBanner />
 
                 <main className="app__main" id="main" tabIndex={-1}>
-                    <section className="widgets" aria-label="Widgets de télémétrie">
+                    <section
+                        className={`widgets ${showMap && showWidgets ? "widgets--both" : showMap ? "widgets--map-only" : "widgets--instruments-only"}`}
+                        aria-label="Widgets de télémétrie"
+                    >
                         {showWidgets && (
                             <>
                                 <article id="speed" className="widget widget--speed" aria-labelledby="speed-title">
