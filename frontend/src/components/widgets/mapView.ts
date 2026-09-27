@@ -66,6 +66,16 @@ export function categoryOf(o: MapObject): MapCategory {
     return "other";
 }
 
+/** Ne compter que les objets pouvant être positionnés sur la carte. */
+export function hasMapPosition(o: MapObject): boolean {
+    if (categoryOf(o) === "area" && o.sx != null && o.sy != null && o.ex != null && o.ey != null) {
+        return [o.sx, o.sy, o.ex, o.ey].every(Number.isFinite);
+    }
+    if (o.x != null && o.y != null) return Number.isFinite(o.x) && Number.isFinite(o.y);
+    return o.sx != null && o.sy != null && o.ex != null && o.ey != null &&
+        [o.sx, o.sy, o.ex, o.ey].every(Number.isFinite);
+}
+
 /** Angle horaire depuis le nord de la carte (y croît vers le bas dans l'image). */
 export function directionHeading(o: MapObject): number | undefined {
     if (o.dx == null || o.dy == null || !Number.isFinite(o.dx) || !Number.isFinite(o.dy) ||

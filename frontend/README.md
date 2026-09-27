@@ -99,6 +99,9 @@ reste distincte des cases à cocher de la
 légende des types, qui permettent de masquer séparément les symboles de chaque
 famille. La case « Tout afficher » masque ou réaffiche tous les types en un clic
 et indique un état intermédiaire lorsque seuls certains types sont visibles.
+Le résumé de cette légende indique le nombre d'objets positionnés transmis par
+le jeu, le nombre associé aux types activés et le détail par type (sur toute la
+carte, pas uniquement dans la zone actuellement zoomée).
 Les couleurs de chaque symbole proviennent des objets renvoyés par le
 jeu. Les catégories « aérodrome / piste » et « objectif » reprennent les types
 disponibles dans l'API ; celle-ci ne distingue pas davantage les différents

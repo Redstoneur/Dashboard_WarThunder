@@ -5,7 +5,7 @@ import { POLL_INTERVALS } from "../../config/env";
 import { usePolling } from "../../hooks/usePolling";
 import type { CompassData, MapInfo, MapObject } from "../../api/types";
 import MapSymbol from "./MapSymbol";
-import { actionView, categoryOf, clampView, DEFAULT_VISIBILITY, directionHeading, FULL_VIEW, MAP_CATEGORIES, playerView, zoomAtPoint } from "./mapView";
+import { actionView, categoryOf, clampView, DEFAULT_VISIBILITY, directionHeading, FULL_VIEW, hasMapPosition, MAP_CATEGORIES, playerView, zoomAtPoint } from "./mapView";
 import type { MapMode, MapView, MapVisibility } from "./mapView";
 
 const MAP_SYMBOL_SIZE = 4 / 3;
@@ -57,6 +57,11 @@ export default function MapWidget() {
     const allTypesChecked = MAP_CATEGORIES.every(({ id }) => visibility[id]);
     const someTypesChecked = MAP_CATEGORIES.some(({ id }) => visibility[id]);
     const allTypesRef = useRef<HTMLInputElement>(null);
+    const positionedObjects = (objects ?? []).filter(hasMapPosition);
+    const categoryCounts = MAP_CATEGORIES.map(({ id, label }) => ({
+        id, label, count: positionedObjects.filter((o) => categoryOf(o) === id).length
+    }));
+    const shownCount = categoryCounts.reduce((sum, { id, count }) => sum + (visibility[id] ? count : 0), 0);
     const battlefieldView = actionView(objects ?? []);
     const currentPlayerView = playerView(objects ?? []);
     const view = mode === "manual" ? manualView
@@ -256,7 +261,7 @@ export default function MapWidget() {
                             height: imageRect.height
                         }}
                     >
-                        {(objects ?? []).map((o, i) => {
+                        {positionedObjects.map((o, i) => {
                             const category = categoryOf(o);
                             if (!visibility[category]) return null;
                             const rgb = o.color_rgb;
@@ -314,6 +319,9 @@ export default function MapWidget() {
             </div>
             <fieldset className="map-type-legend">
                 <legend>Afficher les types d'éléments</legend>
+                <p className="map-type-legend__summary">
+                    Éléments présents : <strong>{positionedObjects.length}</strong> · types activés : {shownCount} éléments
+                </p>
                 <label className="map-type-legend__item map-type-legend__all">
                     <input
                         ref={allTypesRef}
@@ -327,12 +335,12 @@ export default function MapWidget() {
                     />
                     Tout afficher
                 </label>
-                {MAP_CATEGORIES.map(({ id, label }) => (
+                {categoryCounts.map(({ id, label, count }) => (
                     <label key={id} className="map-type-legend__item">
                         <input type="checkbox" checked={visibility[id]}
                             onChange={() => setVisibility((current) => ({ ...current, [id]: !current[id] }))} />
                         <MapSymbol category={id} className="map-type-legend__icon" />
-                        {label}
+                        {label} <span className="map-type-legend__count">{count}</span>
                     </label>
                 ))}
             </fieldset>

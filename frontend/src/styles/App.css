@@ -509,6 +509,17 @@
     color: var(--color-text);
 }
 
+.map-type-legend__summary {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.map-type-legend__summary strong,
+.map-type-legend__count {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
 .map-type-legend__icon {
     width: 1rem;
     height: 1rem;
