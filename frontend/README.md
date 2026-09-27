@@ -13,18 +13,20 @@ artificiel (gyroscope) et carte tactique. Toutes les jauges sont dessinées en *
 - [Scripts](#scripts)
 - [Structure du projet](#structure-du-projet)
 - [Fonctionnement hors-ligne](#fonctionnement-hors-ligne)
+- [Affichage adaptatif](#affichage-adaptatif)
+- [Carte tactique](#carte-tactique)
 - [Docker](#docker)
 
 ## Prérequis
 
-- Node.js >= 20
+- Node.js >= 20.19 ou >= 22.12 (Node.js 24 LTS recommandé pour Vite 7)
 - Le backend (`../backend`) démarré, ou accessible via `VITE_API_BASE_URL`.
 
 ## Installation
 
 ```bash
 cd frontend
-npm install
+npm ci
 ```
 
 ## Configuration
@@ -35,7 +37,7 @@ cp .env.example .env
 
 | Variable                              | Défaut                   | Description                                                        |
 |----------------------------------------|---------------------------|----------------------------------------------------------------------|
-| `VITE_API_BASE_URL`                    | *(vide)*                  | URL absolue du backend. Vide = requêtes relatives (proxy/Nginx)      |
+| `VITE_API_BASE_URL`                    | *(vide)*                  | URL absolue du backend, intégrée au build. Vide = requêtes relatives (proxy/Nginx) |
 | `VITE_DEV_API_PROXY_TARGET`             | `http://localhost:8000`   | Cible du proxy `/api` en développement (`npm run dev`)               |
 | `VITE_DEV_PORT`                        | `5173`                    | Port du serveur de développement Vite                                |
 | `VITE_POLL_STATUS_MS`                  | `5000`                    | Intervalle de polling du statut API                                  |
@@ -135,3 +137,4 @@ et les zones restent fixes.
 Voir le [`Dockerfile`](./Dockerfile) (build Vite + service Nginx avec reverse-proxy `/api`
 configurable via `BACKEND_HOST`/`BACKEND_PORT`) et le
 [`docker-compose.yml`](../docker-compose.yml) à la racine du projet.
+Pour changer `VITE_API_BASE_URL` dans Docker, reconstruisez l'image frontend.

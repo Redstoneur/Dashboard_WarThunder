@@ -5,34 +5,6 @@ export enum ArmyEnum {
     NAVY = "navy"
 }
 
-/** Icônes possibles pour les objets affichés sur la carte. */
-export enum MapObjectIcon {
-    PLAYER = "Player",
-    FIGHTER = "Fighter",
-    LIGHT_TANK = "LightTank",
-    MEDIUM_TANK = "MediumTank",
-    SPAA = "SPAA",
-    TORPEDO_BOAT = "TorpedoBoat",
-    SHIP = "Ship",
-    BOMBING_POINT = "bombing_point",
-    BOAT = "Boat",
-    NONE = "none"
-}
-
-/** Fonds d'icône pour les objets affichés sur la carte. */
-export enum MapObjectIconBg {
-    SPAATARGET = "SPAATarget",
-    NONE = "none"
-}
-
-/** Types d'objets affichés sur la carte. */
-export enum MapObjectType {
-    AIRCRAFT = "aircraft",
-    GROUND_MODEL = "ground_model",
-    AIRFIELD = "airfield",
-    BOMBING_POINT = "bombing_point"
-}
-
 /** Points cardinaux/intercardinaux utilisés par la boussole. */
 export enum CompassDirection {
     NORTH = "N",

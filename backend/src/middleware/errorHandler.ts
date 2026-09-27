@@ -4,7 +4,6 @@ import { logger } from "../utils/logger.js";
 import { HttpError, UpstreamUnavailableError } from "../utils/errors.js";
 
 /** Middleware Express centralisant la gestion des erreurs (404 -> handler par défaut, autres -> ici). */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
     if (err instanceof UpstreamUnavailableError) {
         logger.error("Upstream error", { message: err.message });

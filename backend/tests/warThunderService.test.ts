@@ -30,6 +30,22 @@ describe("warThunderService fallback behaviour", () => {
         expect(result).toBe(0);
     });
 
+    it("preserves naval and unknown map object types from the game", async () => {
+        vi.spyOn(axios, "get").mockResolvedValue({
+            data: [
+                { type: "sea_model", icon: "Destroyer", x: 0.2, y: 0.3 },
+                { type: "new_vehicle", icon: "NewIcon", x: 0.5, y: 0.6 }
+            ]
+        });
+
+        const objects = await warThunderService.getMapObjects();
+
+        expect(objects.map(({ type, icon }) => ({ type, icon }))).toEqual([
+            { type: "sea_model", icon: "Destroyer" },
+            { type: "new_vehicle", icon: "NewIcon" }
+        ]);
+    });
+
     it("getStatus reports upstream as unreachable", async () => {
         vi.spyOn(axios, "get").mockRejectedValue(new Error("ECONNREFUSED"));
 

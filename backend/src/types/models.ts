@@ -1,4 +1,4 @@
-import type { ArmyEnum, CompassDirection, MapObjectIcon, MapObjectIconBg, MapObjectType } from "./enums.js";
+import type { ArmyEnum, CompassDirection } from "./enums.js";
 
 /** Statut simple de l'API. */
 export interface Status {
@@ -98,9 +98,9 @@ export interface MapInfoModel {
 
 /** Objet affiché sur la carte (avion, aérodrome, véhicule...). */
 export interface MapObjectModel {
-    type: MapObjectType;
-    icon: MapObjectIcon | null;
-    icon_bg: MapObjectIconBg | null;
+    type: string;
+    icon: string | null;
+    icon_bg: string | null;
     color_hex: string | null;
     color_rgb: number[] | null;
     blink: number | null;

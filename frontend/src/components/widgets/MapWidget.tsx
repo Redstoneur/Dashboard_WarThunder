@@ -112,6 +112,12 @@ export default function MapWidget() {
                 }
                 const blob = await res.blob();
                 if (!mounted) return;
+                if (blob.size === 0) {
+                    if (objectUrl) URL.revokeObjectURL(objectUrl);
+                    objectUrl = null;
+                    setImgUrl(null);
+                    return;
+                }
                 const nextUrl = URL.createObjectURL(blob);
                 if (objectUrl) URL.revokeObjectURL(objectUrl);
                 objectUrl = nextUrl;

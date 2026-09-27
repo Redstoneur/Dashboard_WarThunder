@@ -45,18 +45,20 @@ tourner le jeu — le backend l'appelle en HTTP classique, aucun changement de c
 | Le jeu tourne **hors du réseau local**            | Possible techniquement (IP publique/VPN), **déconseillé** : l'API du jeu n'est ni authentifiée ni chiffrée — ne l'exposez pas sur Internet sans protection (VPN/pare-feu). |
 
 Détails complets dans [backend/README.md](./backend/README.md#connexion-au-serveur-war-thunder-local-ou-réseau-local).
+Sur une autre machine, l'API du jeu doit être accessible sur son IP LAN et le port 8111
+autorisé par son pare-feu ; une API limitée à `127.0.0.1` ne peut pas être jointe à distance.
 
 ## Démarrage rapide (sans Docker)
 
 ```bash
 # Backend
 cd backend
-npm install
+npm ci
 npm run dev            # http://localhost:8000
 
 # Frontend (autre terminal)
 cd frontend
-npm install
+npm ci
 npm run dev            # http://localhost:5173 (proxy /api -> backend)
 ```
 

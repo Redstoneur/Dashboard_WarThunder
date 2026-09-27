@@ -32,8 +32,8 @@ Prérequis : Node.js >= 20, npm >= 10, et optionnellement Docker.
 git clone <repo>
 cd Dashboard_WarThunder
 
-cd backend && npm install && cp .env.example .env && cd ..
-cd frontend && npm install && cp .env.example .env && cd ..
+cd backend && npm ci && cp .env.example .env && cd ..
+cd frontend && npm ci && cp .env.example .env && cd ..
 ```
 
 Le serveur War Thunder d'origine (la machine sur laquelle le jeu tourne) n'étant pas
@@ -55,8 +55,8 @@ d'échouer. Voir [backend/README.md](./backend/README.md#comportement-hors-ligne
   préférez des types explicites.
 - **ESLint** doit passer sans erreur avant toute PR :
   ```bash
-  cd backend && npm run lint
-  cd frontend && npm run lint
+  cd backend && npm run lint && cd ..
+  cd frontend && npm run lint && cd ..
   ```
 - Commentez uniquement le code qui en a besoin (logique non triviale) ; le code doit
   rester lisible par lui-même autant que possible.
@@ -66,19 +66,20 @@ d'échouer. Voir [backend/README.md](./backend/README.md#comportement-hors-ligne
 ## Tests
 
 ```bash
-cd backend && npm test
+cd backend && npm test && cd ..
 ```
 
 > Le serveur War Thunder d'origine n'étant pas disponible en environnement de
-> développement/CI, les tests backend couvrent actuellement la logique de fallback et les
-> utilitaires purs. Des tests d'intégration contre une vraie instance de War Thunder
+> développement/CI, les tests backend couvrent actuellement la logique de fallback,
+> les objets de carte, le contrat OpenAPI et les utilitaires purs.
+> Des tests d'intégration contre une vraie instance de War Thunder
 > pourront être ajoutés ultérieurement — les contributions dans ce sens sont bienvenues.
 
 Avant de proposer une PR, vérifiez aussi que les deux projets compilent :
 
 ```bash
-cd backend && npm run build
-cd frontend && npm run build
+cd backend && npm run build && cd ..
+cd frontend && npm run build && cd ..
 ```
 
 Et, si vous touchez aux Dockerfiles ou au `docker-compose.yml` :

@@ -2,10 +2,10 @@
 
 API Node.js/TypeScript qui relaie les données télémétriques exposées localement par
 **War Thunder** (`http://<ip-du-jeu>:8111/...`) vers le tableau de bord frontend, avec un
-schéma de données stable, validé et documenté.
+schéma de données documenté (les réponses brutes du jeu sont relayées sans validation à l'exécution).
 
-Ce backend est une réécriture 1:1 (mêmes routes, même comportement) de l'ancien backend
-Python/FastAPI, en Node.js + TypeScript + Express.
+Ce backend reprend les routes de télémétrie de l'ancien backend Python/FastAPI
+en Node.js + TypeScript + Express, avec un mode de repli activé par défaut.
 
 ## Sommaire
 
@@ -22,14 +22,14 @@ Python/FastAPI, en Node.js + TypeScript + Express.
 
 ## Prérequis
 
-- Node.js >= 20
+- Node.js >= 20 (Node.js 24 LTS recommandé)
 - npm >= 10
 
 ## Installation
 
 ```bash
 cd backend
-npm install
+npm ci
 ```
 
 ## Configuration
@@ -85,8 +85,11 @@ Tous les endpoints sont préfixés par `/api/v1` (ou `/api/v2` pour l'altitude e
 
 ## Documentation API (Swagger / OpenAPI)
 
-L'API est entièrement documentée au format [OpenAPI 3.0.3](https://spec.openapis.org/oas/v3.0.3),
-généré à la main dans `src/docs/openapi.ts` (aucune route n'est ajoutée sans être documentée).
+Les routes de télémétrie sont décrites au format
+[OpenAPI 3.0.3](https://spec.openapis.org/oas/v3.0.3) dans `src/docs/openapi.ts`.
+Les réponses brutes (`/indicators`, `/map_info`) dépendent du jeu et ne sont pas
+validées à l'exécution ; la spécification décrit leurs champs connus, sans garantir
+que chacun soit présent.
 
 - **Swagger UI (interactif)** : [`/api/docs`](http://localhost:8000/api/docs)
 - **Spécification brute (JSON)** : [`/api/openapi.json`](http://localhost:8000/api/openapi.json)
@@ -101,11 +104,14 @@ routes sont également listées dans la réponse `GET /` de l'API.
 
 - **Même machine que le backend/Docker** : utilisez `localhost` (nature) ou, si le backend
   tourne dans Docker, `host.docker.internal` (déjà mappé vers l'hôte via
-  `extra_hosts: host-gateway` dans `docker-compose.yml`).
+  `extra_hosts: host-gateway` dans `docker-compose.yml`). Sur Linux, l'API du jeu
+  doit accepter les connexions venant de l'interface passerelle Docker :
+  un service limité à `127.0.0.1` sur l'hôte n'est pas joignable depuis le conteneur.
 - **Autre machine du même réseau local (LAN)** : renseignez simplement l'IP LAN de la machine
   qui fait tourner le jeu (ex: `WAR_THUNDER_IP=192.168.1.42`). Le conteneur Docker (réseau bridge)
-  peut nativement joindre les IP du réseau local, aucune configuration réseau supplémentaire
-  n'est nécessaire côté Docker.
+  peut nativement joindre les IP du réseau local ; il faut que l'API du jeu écoute sur
+  une interface accessible et que le pare-feu de cette machine autorise le port 8111.
+  Aucune configuration réseau supplémentaire n'est nécessaire côté Docker.
 - **Machine hors réseau local (Internet)** : techniquement possible (IP publique/VPN), mais
   **déconseillé** : l'API locale de War Thunder ne prévoit aucune authentification/chiffrement.
   N'exposez ce port en dehors de votre réseau local sans pare-feu/VPN/reverse-proxy sécurisé.
@@ -116,7 +122,10 @@ La machine de jeu (serveur d'origine War Thunder) n'est pas toujours allumée/jo
 Par défaut (`UPSTREAM_FALLBACK_ENABLED=true`), lorsque le jeu est injoignable, l'API répond
 quand même en HTTP 200 avec des données de base neutres (`valid: false`, valeurs à `0`/`null`)
 plutôt que de renvoyer une erreur, afin que le frontend reste utilisable et affiche un état
-"hors-ligne" clair. `GET /api/v1/status` expose ce diagnostic (`upstream.reachable`).
+"hors-ligne" clair. Les valeurs de repli varient selon la route : les indicateurs et
+l'état portent `valid: false`, les valeurs calculées valent zéro, les objets forment
+une liste vide et l'image de carte est vide. `GET /api/v1/status` expose ce diagnostic
+(`upstream.reachable`).
 
 Pour retrouver le comportement historique (erreur `502 Bad Gateway` si le jeu est injoignable),
 mettre `UPSTREAM_FALLBACK_ENABLED=false`.
@@ -128,8 +137,9 @@ npm test
 ```
 
 > ℹ️ Le serveur War Thunder d'origine (la machine sur laquelle le jeu tourne) n'étant pas
-> disponible en environnement de CI/dev, les tests actuels couvrent la logique de fallback
-> (upstream injoignable) et les utilitaires purs (boussole...). Des tests d'intégration
+> disponible en environnement de CI/dev, les tests actuels couvrent la logique de fallback,
+> la conversion d'objets de carte, le contrat OpenAPI et les utilitaires purs (boussole...).
+> Des tests d'intégration
 > plus poussés contre une vraie instance de War Thunder pourront être ajoutés par la suite.
 
 ## Docker

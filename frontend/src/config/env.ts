@@ -1,7 +1,7 @@
 /**
  * Configuration runtime du frontend, résolue depuis les variables d'environnement Vite
- * (`VITE_*`, voir `.env.example`). Permet de pointer vers un backend distant sans
- * recompiler (ex: déploiement Docker séparé backend/frontend).
+ * (`VITE_*`, voir `.env.example`). Ces valeurs sont intégrées au build Vite :
+ * changer l'adresse du backend nécessite de reconstruire le frontend.
  */
 
 const rawBase = import.meta.env.VITE_API_BASE_URL ?? "";

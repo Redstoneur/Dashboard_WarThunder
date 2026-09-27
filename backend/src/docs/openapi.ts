@@ -1,7 +1,7 @@
 import { config } from "../config/env.js";
 
 /**
- * Spécification OpenAPI 3.0.3 décrivant l'ensemble des endpoints exposés par l'API.
+ * Spécification OpenAPI 3.0.3 décrivant les endpoints de télémétrie exposés par l'API.
  * Servie en JSON sur `/api/openapi.json` et via Swagger UI sur `/api/docs`.
  *
  * Toute évolution de routes (ajout/suppression/modification) doit être répercutée ici afin
@@ -31,8 +31,7 @@ export function buildOpenApiDocument() {
 
     const indicatorsSchema = {
         type: "object",
-        description: "Indicateurs bruts de vol/véhicule (la quasi-totalité des champs est optionnelle selon le véhicule).",
-        required: ["valid", "army", "type"],
+        description: "Relais des indicateurs bruts ; les champs dépendent du véhicule et de la réponse du jeu.",
         properties: {
             valid: { type: "boolean" },
             army: { type: "string", enum: ["air", "ground", "navy"] },
@@ -69,7 +68,6 @@ export function buildOpenApiDocument() {
 
     const mapInfoSchema = {
         type: "object",
-        required: ["grid_size", "grid_steps", "grid_zero", "map_max", "map_min", "valid"],
         properties: {
             grid_size: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 },
             grid_steps: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 },
@@ -86,7 +84,11 @@ export function buildOpenApiDocument() {
         type: "object",
         required: ["type"],
         properties: {
-            type: { type: "string", enum: ["aircraft", "ground_model", "airfield", "bombing_point"] },
+            type: {
+                type: "string",
+                description: "Type fourni par le jeu (par exemple aircraft, ground_model, sea_model, airfield).",
+                example: "sea_model"
+            },
             icon: { type: "string", nullable: true },
             icon_bg: { type: "string", nullable: true },
             color_hex: { type: "string", nullable: true, example: "#faC81E" },
@@ -191,7 +193,8 @@ export function buildOpenApiDocument() {
                 "API relayant/normalisant les données exposées localement par War Thunder " +
                 `(http://${config.warThunderIp}:${config.warThunderPort}) pour le tableau de bord. ` +
                 "Lorsque le jeu est injoignable et que UPSTREAM_FALLBACK_ENABLED=true (par défaut), " +
-                "les endpoints renvoient des données par défaut (valid: false) au lieu d'une erreur 502.",
+                "les endpoints renvoient des valeurs de repli adaptées à chaque route (données invalides, " +
+                "nombres à zéro, liste/image vide) au lieu d'une erreur 502.",
             license: { name: "GPL-3.0", url: "https://www.gnu.org/licenses/gpl-3.0.html" }
         },
         servers: [{ url: "/", description: "Serveur courant" }],
@@ -274,7 +277,7 @@ export function buildOpenApiDocument() {
                             in: "query",
                             required: false,
                             schema: { type: "boolean", default: false },
-                            description: "Si true, renvoie { content, content_type } en JSON plutôt qu'un flux binaire."
+                            description: "Si true (ou 1), renvoie { content, content_type } en JSON plutôt qu'un flux binaire."
                         }
                     ],
                     responses: {
@@ -282,6 +285,9 @@ export function buildOpenApiDocument() {
                             description: "Map image retrieved successfully",
                             content: {
                                 "image/*": { schema: { type: "string", format: "binary" } },
+                                "application/octet-stream": {
+                                    schema: { type: "string", format: "binary" }
+                                },
                                 "application/json": {
                                     schema: {
                                         type: "object",

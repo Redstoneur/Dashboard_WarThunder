@@ -9,7 +9,10 @@ export function usePolling<T>(fetcher: (signal: AbortSignal) => Promise<T>, inte
     const [data, setData] = useState<T | null>(null);
     const [online, setOnline] = useState<boolean>(true);
     const fetcherRef = useRef(fetcher);
-    fetcherRef.current = fetcher;
+
+    useEffect(() => {
+        fetcherRef.current = fetcher;
+    });
 
     useEffect(() => {
         let stopped = false;

@@ -22,11 +22,6 @@ export interface GyroscopeData {
     turn: number;
 }
 
-export interface AltitudeData {
-    altitude_meters: number | null;
-    gear_deployed: boolean | null;
-}
-
 export interface MapInfo {
     grid_size: [number, number];
     grid_steps: [number, number];

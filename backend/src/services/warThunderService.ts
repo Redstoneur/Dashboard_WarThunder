@@ -1,5 +1,5 @@
 import { config } from "../config/env.js";
-import { getCompassDirection, MapObjectIcon, MapObjectIconBg, MapObjectType } from "../types/enums.js";
+import { getCompassDirection } from "../types/enums.js";
 import type {
     AltitudeModel,
     CompassModel,
@@ -97,9 +97,9 @@ interface RawMapObject {
 
 function toMapObjectModel(item: RawMapObject): MapObjectModel {
     return {
-        type: (item.type as MapObjectType) ?? MapObjectType.GROUND_MODEL,
-        icon: item.icon ? ((item.icon as MapObjectIcon) ?? null) : null,
-        icon_bg: item.icon_bg ? ((item.icon_bg as MapObjectIconBg) ?? null) : null,
+        type: item.type ?? "ground_model",
+        icon: item.icon || null,
+        icon_bg: item.icon_bg || null,
         color_hex: item.color ?? null,
         color_rgb: item["color[]"] ?? null,
         blink: item.blink ?? null,
