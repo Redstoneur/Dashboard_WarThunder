@@ -1,0 +1,41 @@
+:root {
+    color-scheme: dark;
+    --color-bg: #0b1220;
+    --color-surface: #121b2e;
+    --color-surface-alt: #182543;
+    --color-border: #253254;
+    --color-text: #e7ecf7;
+    --color-text-muted: #93a0bf;
+    --color-accent: #4da3ff;
+    --color-danger: #ff5d5d;
+    --color-warning: #ffb84d;
+    --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body, #root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at top, #16213f 0%, var(--color-bg) 60%);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+}
+
+a {
+    color: inherit;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}

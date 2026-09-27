@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="War Thunder Dashboard emblem">
+  <title>War Thunder Dashboard</title>
+  <desc>Tactical emblem: aircraft silhouette over a radar, framed by a compass ring.</desc>
+
+  <!-- Outer tactical ring -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M400 48 A352 352 0 0 1 752 400" stroke="#f2f2f2" stroke-width="14"/>
+    <path d="M752 400 A352 352 0 0 1 400 752" stroke="#f2f2f2" stroke-width="14"/>
+    <path d="M400 752 A352 352 0 0 1 48 400" stroke="#f2f2f2" stroke-width="14"/>
+    <path d="M48 400 A352 352 0 0 1 400 48" stroke="#f2f2f2" stroke-width="14"/>
+
+    <path d="M400 82 A318 318 0 0 1 718 400" stroke="#73777b" stroke-width="9"/>
+    <path d="M718 400 A318 318 0 0 1 400 718" stroke="#73777b" stroke-width="9"/>
+    <path d="M400 718 A318 318 0 0 1 82 400" stroke="#73777b" stroke-width="9"/>
+    <path d="M82 400 A318 318 0 0 1 400 82" stroke="#73777b" stroke-width="9"/>
+  </g>
+
+  <!-- Cardinal marks -->
+  <g fill="#f2f2f2">
+    <rect x="392" y="24" width="16" height="58" rx="3"/>
+    <rect x="392" y="718" width="16" height="58" rx="3"/>
+    <rect x="24" y="392" width="58" height="16" rx="3"/>
+    <rect x="718" y="392" width="58" height="16" rx="3"/>
+  </g>
+
+  <!-- Red star / tactical chevrons -->
+  <path d="M400 92 L456 276 L650 276 L493 386 L552 570 L400 458 L248 570 L307 386 L150 276 L344 276 Z"
+        fill="#e21b23"/>
+  <path d="M400 92 L400 458 L248 570 L307 386 L150 276 L344 276 Z"
+        fill="#ff2029"/>
+  <path d="M400 92 L456 276 L650 276 L493 386 L400 458 Z"
+        fill="#a80f16"/>
+
+  <!-- Aircraft silhouette (top-down delta jet, corrected proportions) -->
+  <g stroke="#151719" stroke-width="8" stroke-linejoin="round">
+    <path d="M400 145 L416 210 L434 290 L648 380 L458 400 L426 430 L500 460 L418 480 L400 495
+             L382 480 L300 460 L374 430 L342 400 L152 380 L366 290 L384 210 Z"
+          fill="#f4f4f4"/>
+  </g>
+
+  <!-- Fuselage dark spine -->
+  <path d="M400 162 L390 208 L386 262 L400 288 L414 262 L410 208 Z" fill="#151719"/>
+
+  <!-- Cockpit canopy -->
+  <path d="M400 178
+           C388 196 382 218 386 242
+           L400 260
+           L414 242
+           C418 218 412 196 400 178 Z"
+        fill="#73777b" stroke="#f4f4f4" stroke-width="6"/>
+
+  <!-- Tail cone accent -->
+  <path d="M400 452 L412 480 L400 495 L388 480 Z" fill="#151719"/>
+
+  <!-- Under-wing tactical marks -->
+  <g fill="#d7d9da" stroke="#151719" stroke-width="5" stroke-linejoin="round">
+    <path d="M256 398 L214 442 L276 418 Z"/>
+    <path d="M300 406 L266 448 L322 424 Z"/>
+    <path d="M544 398 L586 442 L524 418 Z"/>
+    <path d="M500 406 L534 448 L478 424 Z"/>
+  </g>
+
+  <!-- Lower radar -->
+  <g transform="translate(400 620)" fill="none" stroke-linecap="round">
+    <circle r="112" stroke="#f2f2f2" stroke-width="7"/>
+    <circle r="82" stroke="#73777b" stroke-width="6"/>
+    <circle r="52" stroke="#73777b" stroke-width="5"/>
+    <circle r="22" stroke="#73777b" stroke-width="5"/>
+    <path d="M-112 0 H112 M0 -112 V112" stroke="#73777b" stroke-width="4"/>
+    <path d="M-79 -79 L79 79 M79 -79 L-79 79" stroke="#34383b" stroke-width="3"/>
+  </g>
+
+  <!-- Radar sweep -->
+  <path d="M400 620 L454 527 A112 112 0 0 0 400 508 Z" fill="#f21e28"/>
+  <circle cx="400" cy="620" r="10" fill="#f2f2f2"/>
+
+  <!-- Radar contacts -->
+  <g fill="#f21e28">
+    <circle cx="341" cy="583" r="9"/>
+    <circle cx="456" cy="651" r="8"/>
+    <circle cx="332" cy="664" r="10"/>
+    <circle cx="365" cy="682" r="6"/>
+  </g>
+
+  <!-- Lower tactical brackets -->
+  <g fill="none" stroke="#f2f2f2" stroke-width="9" stroke-linecap="round">
+    <path d="M276 675 A132 132 0 0 0 340 744"/>
+    <path d="M524 675 A132 132 0 0 1 460 744"/>
+  </g>
+</svg>

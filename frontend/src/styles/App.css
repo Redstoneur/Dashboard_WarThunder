@@ -1,0 +1,827 @@
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+}
+
+/* ---------- Header / Navigation ---------- */
+
+.app__header {
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.5rem;
+    background: linear-gradient(180deg, var(--color-surface) 0%, rgba(18, 27, 46, 0.6) 100%);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(6px);
+}
+
+.app__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.app__header-center {
+    display: flex;
+    justify-content: center;
+}
+
+.app__header-spacer {
+    /* Colonne miroir de .app__brand, pour garder .app__header-center parfaitement centrée. */
+}
+
+.app__logo {
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.app__title {
+    margin: 0;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+}
+
+.app__subtitle {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+/* ---------- Status banner ---------- */
+
+.status-banner {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1.5rem;
+    background: rgba(255, 184, 77, 0.12);
+    color: var(--color-warning);
+    border-bottom: 1px solid rgba(255, 184, 77, 0.35);
+    font-size: 0.85rem;
+}
+
+/* ---------- Main / widgets grid ---------- */
+
+.app__main {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: clamp(0.4rem, 1vh, 1rem);
+}
+
+.widgets {
+    display: grid;
+    gap: clamp(0.4rem, 1vh, 1rem);
+    width: 100%;
+    flex: 1 0 0;
+    min-height: 0;
+}
+
+.widgets--both {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr) minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+        "speed map compass"
+        "altitude map gyro";
+}
+
+.widgets--map-only {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "map";
+}
+
+.widgets--instruments-only {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "speed altitude compass gyro";
+}
+
+.widget--speed { grid-area: speed; }
+.widget--altitude { grid-area: altitude; }
+.widget--compass { grid-area: compass; }
+.widget--gyro { grid-area: gyro; }
+
+.widget--map {
+    grid-area: map;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.widget:not(.widget--map) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    container-type: size;
+    --gauge-reserve: 2.8rem;
+}
+
+.widget.widget--altitude {
+    --gauge-reserve: 7rem;
+}
+
+.widget.widget--gyro {
+    --gauge-reserve: 8.5rem;
+}
+
+.widget:not(.widget--map) .widget-card {
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+}
+
+.widget:not(.widget--map) .widget__title {
+    font-size: clamp(0.7rem, min(5cqw, 2.8cqh), 1.1rem);
+    margin-bottom: clamp(0.2rem, 1cqh, 0.75rem);
+}
+
+.widget:not(.widget--map) .widget-card {
+    gap: clamp(0.15rem, 1cqh, 0.6rem);
+}
+
+.view-toggle {
+    display: inline-flex;
+    gap: 0.3rem;
+    padding: 0.25rem;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+}
+
+.view-toggle__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.view-toggle__button:hover {
+    color: var(--color-text);
+}
+
+.view-toggle__button.is-active {
+    background: var(--color-accent);
+    color: #0b1220;
+    font-weight: 600;
+}
+
+.widget__title {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.widget {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: clamp(0.35rem, 1vh, 1.1rem);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.widget--map {
+    min-width: 0;
+}
+
+.widget-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.2rem, 0.6vh, 0.6rem);
+}
+
+.widget-card__offline {
+    margin: 0;
+    color: var(--color-danger);
+    font-size: 0.78rem;
+}
+
+/* ---------- Gauges (speed / altitude) ---------- */
+
+.gauge-arc,
+.altitude-gauge svg,
+.compass-gauge,
+.horizon-gauge {
+    display: block;
+    width: min(100%, 360px, max(0px, calc(100cqh - var(--gauge-reserve))));
+    height: auto;
+    aspect-ratio: 1;
+    flex: none;
+}
+
+.gauge-arc__track {
+    stroke: var(--color-surface-alt);
+    stroke-width: 10;
+}
+
+.gauge-arc__progress {
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke 0.2s ease;
+}
+
+.gauge-arc__tick {
+    stroke: var(--color-border);
+    stroke-width: 2;
+}
+
+.gauge-arc__tick-label {
+    font-size: 8px;
+    fill: var(--color-text-muted);
+}
+
+.gauge-arc__value {
+    font-size: 30px;
+    font-weight: 700;
+    fill: var(--color-text);
+}
+
+.gauge-arc__unit {
+    font-size: 12px;
+    fill: var(--color-text-muted);
+}
+
+.gauge-arc__label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    fill: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+.altitude-gauge {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex: none;
+    min-height: 0;
+}
+
+.altitude-gauge svg {
+    align-self: center;
+}
+
+.altitude-gauge__track {
+    fill: none;
+    stroke: var(--color-surface-alt);
+    stroke-width: 10;
+}
+
+.altitude-gauge__progress {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 110px 110px;
+    transition: stroke-dashoffset 0.2s ease;
+}
+
+.gear-indicator {
+    margin-top: -0.4rem;
+    font-size: clamp(0.6rem, min(4.2cqw, 2.6cqh), 0.9rem);
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+}
+
+.gear-indicator--down {
+    color: #7be08a;
+    border-color: #2e6b3d;
+}
+
+.gear-indicator--up {
+    color: var(--color-warning);
+    border-color: #6b4e1f;
+}
+
+.alarm-toggle {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    font-size: clamp(0.65rem, min(4.5cqw, 2.7cqh), 0.95rem);
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.alarm-toggle.on {
+    border-color: #2e6b3d;
+    color: #7be08a;
+}
+
+.alarm-toggle.off {
+    border-color: #6b2e2e;
+    color: var(--color-danger);
+}
+
+.alarm-toggle:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+    background: var(--color-surface-alt);
+}
+
+/* ---------- Compass ---------- */
+
+.compass-rose__ring {
+    fill: var(--color-surface-alt);
+    stroke: var(--color-border);
+    stroke-width: 2;
+}
+
+.compass-rose__tick,
+.compass-rose__tick-major {
+    stroke: var(--color-text-muted);
+}
+
+.compass-rose__tick-major {
+    stroke-width: 2;
+}
+
+.compass-rose__tick {
+    stroke-width: 1;
+}
+
+.compass-rose__label {
+    font-size: 8px;
+    fill: var(--color-text-muted);
+}
+
+.compass-rose__label-major {
+    font-size: 11px;
+    font-weight: 700;
+    fill: var(--color-text);
+}
+
+.compass-rose__needle {
+    fill: var(--color-danger);
+}
+
+/* ---------- Artificial horizon (gyroscope) ---------- */
+
+.horizon__sky {
+    fill: #2a5da8;
+}
+
+.horizon__ground {
+    fill: #6b4423;
+}
+
+.horizon__line {
+    stroke: var(--color-text);
+    stroke-width: 1.5;
+}
+
+.horizon__pitch-tick {
+    stroke: var(--color-text);
+    stroke-width: 1;
+}
+
+.horizon__bezel {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 4;
+}
+
+.horizon__roll-marker {
+    fill: var(--color-warning);
+}
+
+.horizon__fixed-aircraft line,
+.horizon__fixed-aircraft circle {
+    stroke: #ffcc00;
+    stroke-width: 3;
+    fill: #ffcc00;
+}
+
+.gyro-readouts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.3rem clamp(0.2rem, 1cqw, 1rem);
+    width: 100%;
+    font-size: clamp(0.65rem, min(5cqw, 2.5cqh), 1.05rem);
+}
+
+.gyro-readouts__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.2rem;
+    min-width: 0;
+    color: var(--color-text-muted);
+}
+
+.gyro-readouts__row strong {
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+/* Quand le dessin de l'horizon est masqué, les valeurs prennent toute la place disponible
+   dans le widget : une seule colonne, police agrandie, pour rester lisibles sans repère visuel. */
+.gyro-readouts--expanded {
+    grid-template-columns: 1fr;
+    gap: clamp(0.2rem, 1cqh, 0.6rem);
+    font-size: clamp(0.85rem, min(6cqw, 3.8cqh), 1.35rem);
+    padding: 0.4rem 0;
+}
+
+.gyro-readouts--expanded .gyro-readouts__row {
+    font-size: inherit;
+}
+
+.gyro-readouts--expanded .gyro-readouts__row strong {
+    font-size: clamp(0.95rem, min(6.5cqw, 4cqh), 1.5rem);
+}
+
+@container (max-width: 210px) {
+    .gyro-readouts:not(.gyro-readouts--expanded) {
+        grid-template-columns: 1fr;
+        gap: 0.1rem;
+    }
+}
+
+/* ---------- Map ---------- */
+
+.widget-card--map {
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+}
+
+.map-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.map-viewport {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    container-type: size;
+}
+
+.map-container {
+    position: relative;
+    width: min(100cqw, calc(100cqh * var(--map-aspect)));
+    aspect-ratio: var(--map-aspect);
+    flex: none;
+    max-height: 100cqh;
+    background: #0d1526;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    cursor: grab;
+    touch-action: none;
+}
+
+.map-container:active {
+    cursor: grabbing;
+}
+
+.map-scene {
+    position: absolute;
+    inset: 0;
+    transform-origin: center;
+}
+
+.map-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+}
+
+.map-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.map-overlay {
+    position: absolute;
+    /* Le rectangle SVG couvre uniquement l'image affichée (sans les bandes letterbox). */
+}
+
+.map-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+}
+
+.map-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.45rem 0.8rem;
+    flex-wrap: wrap;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+}
+
+.map-modes,
+.map-zoom {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.map-controls button {
+    border: 1px solid var(--color-border);
+    border-radius: 0.4rem;
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+    min-width: 2rem;
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+}
+
+.map-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.map-modes button[aria-pressed="true"] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.map-follow-warning {
+    margin: 0;
+    color: var(--color-warning);
+    font-size: 0.78rem;
+}
+
+.map-filter-controls {
+    position: relative;
+    flex: none;
+}
+
+.map-type-filters {
+    position: relative;
+    width: 100%;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+}
+
+.map-type-filters summary {
+    cursor: pointer;
+    padding: 0.45rem 10.5rem 0.45rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+}
+
+.map-filter-pin {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.3rem;
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.78rem;
+}
+
+.map-filter-pin[aria-pressed="true"] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.map-type-legend {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    display: flex;
+    gap: 0.45rem 1rem;
+    flex-wrap: wrap;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    margin: 0 0 0.3rem;
+    padding: 0.4rem 0.6rem 0.6rem;
+    background: var(--color-surface);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35);
+    color: var(--color-text-muted);
+}
+
+.map-type-filters--pinned .map-type-legend {
+    position: static;
+    max-height: clamp(85px, 17dvh, 170px);
+    overflow-y: auto;
+    box-shadow: none;
+    margin: 0.3rem 0 0;
+}
+
+.map-type-legend__item {
+    display: inline-flex;
+    gap: 0.3rem;
+    align-items: center;
+    cursor: pointer;
+}
+
+.map-type-legend__all {
+    flex-basis: 100%;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.map-type-legend__count {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.map-type-legend__icon {
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-text);
+}
+
+.map-legend {
+    display: flex;
+    gap: 0.3rem 0.7rem;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.legend-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    flex: 0 0 0.6rem;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-dot--friend {
+    background: #4da3ff;
+}
+
+.legend-dot--enemy {
+    background: #ff5d5d;
+}
+
+.legend-dot--player {
+    background: #ffa733;
+}
+
+.legend-dot--teammate {
+    background: #7be08a;
+}
+
+.legend-dot--capture {
+    background: #f4f6fb;
+}
+
+
+/* ---------- Footer ---------- */
+
+.app__footer {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 1rem;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 960px) and (pointer: coarse),
+       (max-width: 700px) and (hover: none) {
+    .app {
+        height: auto;
+        min-height: 100dvh;
+    }
+
+    .app__main {
+        overflow: visible;
+        padding: 0.75rem;
+    }
+
+    .widgets {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        grid-auto-rows: auto;
+        flex: 1 0 auto;
+    }
+
+    .widgets--both {
+        grid-template-areas: "speed" "altitude" "compass" "gyro" "map";
+    }
+
+    .widgets--instruments-only {
+        grid-template-areas: "speed" "altitude" "compass" "gyro";
+    }
+
+    .widgets--map-only {
+        grid-template-areas: "map";
+    }
+
+    .widget {
+        padding: 1rem;
+    }
+
+    .widget:not(.widget--map) {
+        min-height: 300px;
+        container-type: inline-size;
+    }
+
+    .gauge-arc,
+    .altitude-gauge svg,
+    .compass-gauge,
+    .horizon-gauge {
+        width: min(100%, 220px);
+    }
+
+    .map-viewport {
+        container-type: inline-size;
+        aspect-ratio: var(--map-aspect);
+        flex: none;
+    }
+
+    .map-container {
+        width: 100%;
+        flex: none;
+        max-height: none;
+    }
+
+    .map-type-legend {
+        position: static;
+        box-shadow: none;
+        margin: 0.3rem 0 0;
+    }
+
+    .app__header {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        row-gap: 0.6rem;
+    }
+
+    .app__header-spacer {
+        display: none;
+    }
+}
+
+@media (max-width: 700px) and (pointer: fine) {
+    .app__header {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        row-gap: 0.3rem;
+        padding: 0.4rem;
+    }
+
+    .app__header-spacer {
+        display: none;
+    }
+}

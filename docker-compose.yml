@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: warthunder-dashboard-backend:local
+    container_name: warthunder-dashboard-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      WAR_THUNDER_IP: ${WAR_THUNDER_IP:-host.docker.internal}
+      WAR_THUNDER_PORT: ${WAR_THUNDER_PORT:-8111}
+      WAR_THUNDER_TIMEOUT_MS: ${WAR_THUNDER_TIMEOUT_MS:-5000}
+      WAR_THUNDER_IMG_TIMEOUT_MS: ${WAR_THUNDER_IMG_TIMEOUT_MS:-10000}
+      UPSTREAM_FALLBACK_ENABLED: ${UPSTREAM_FALLBACK_ENABLED:-true}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    extra_hosts:
+      # Permet à "host.docker.internal" de fonctionner aussi sous Linux, où le jeu tourne
+      # sur la machine hôte (Docker Desktop le fournit nativement sous Windows/Mac).
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8000/api/v1/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    image: warthunder-dashboard-frontend:local
+    container_name: warthunder-dashboard-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    environment:
+      BACKEND_HOST: backend
+      BACKEND_PORT: 8000
