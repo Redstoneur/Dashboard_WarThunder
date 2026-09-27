@@ -41,6 +41,7 @@ export interface MapInfo {
 export interface MapObject {
     type: string;
     color_hex?: string | null;
+    color_rgb?: number[] | null;
     blink?: number | null;
     icon?: string | null;
     icon_bg?: string | null;

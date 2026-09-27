@@ -79,6 +79,39 @@ d'origine (la machine sur laquelle le jeu tourne) est injoignable, une bannière
 s'affiche et chaque widget affiche "Signal perdu" tout en conservant des valeurs par
 défaut cohérentes (grâce au fallback du backend), plutôt que de planter l'interface.
 
+## Carte tactique
+
+La carte s'ouvre en mode **Suivi de champ de bataille** : son cadrage s'adapte
+aux positions des unités mobiles reçues du jeu (avions, véhicules et navires),
+avec une marge autour de l'action. Quand les unités occupent toute la carte,
+le zoom reste à 100 % ; sans unités, la carte entière est affichée.
+Le mode **Suivi du joueur** garde sa position dans le champ avec un zoom fixe ;
+il est indisponible tant que le jeu ne fournit pas sa position. Si cette
+position disparaît pendant le suivi, la carte entière est affichée avec un
+message ; le suivi reprend dès qu'elle réapparaît. Le **Mode manuel** fige la vue
+courante et suspend les suivis.
+
+Les boutons `+` et `−` et la molette de la souris permettent de régler le zoom
+(la molette garde le point sous le curseur) ; le glisser-déposer permet de
+déplacer la carte. Ces actions passent en mode manuel.
+**Réinitialiser** revient au suivi de champ de bataille. La légende des couleurs
+reste distincte des cases à cocher de la
+légende des types, qui permettent de masquer séparément les symboles de chaque
+famille. La case « Tout afficher » masque ou réaffiche tous les types en un clic
+et indique un état intermédiaire lorsque seuls certains types sont visibles.
+Les couleurs de chaque symbole proviennent des objets renvoyés par le
+jeu. Les catégories « aérodrome / piste » et « objectif » reprennent les types
+disponibles dans l'API ; celle-ci ne distingue pas davantage les différents
+types de bases ou de pistes.
+
+Les navires sont reconnus via les icônes ou types navals de l'API, inclus dans
+le cadrage automatique et filtrables par famille. Le symbole du joueur suit
+le cap fourni par `/api/v1/compass` (0° vers le nord, 90° vers l'est), sans
+faire tourner la carte. Les autres unités et les symboles d'aérodrome sont
+orientés par leur vecteur `dx`/`dy` quand le jeu le fournit ; en l'absence de
+vecteur exploitable, leur symbole garde son orientation initiale. Les objectifs
+et les zones restent fixes.
+
 ## Docker
 
 Voir le [`Dockerfile`](./Dockerfile) (build Vite + service Nginx avec reverse-proxy `/api`
